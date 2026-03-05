@@ -99,35 +99,48 @@ def generate_explorer_avatar() -> dict:
     #
     # 4. Print progress messages for user feedback
     # =========================================================================
-    # MODULE_5_STEP_2_GENERATE_PORTRAIT
-    # First turn: Generate the explorer portrait.
-    # This establishes the character that will be referenced in subsequent turns.
-    portrait_prompt = f"""Create a stylized space explorer portrait.
+    # MODULE_5_STEP_2_GENERATE_PORTRAIT (Photo-based bonus version)
+    # First turn: Transform a real photo into a stylized space explorer portrait.
+    # The photo gives Gemini the person's actual likeness to preserve.
 
-Character appearance: {APPEARANCE}
-Name on suit patch: "{USERNAME}"
-Suit color: {SUIT_COLOR}
+    # Load and convert the photo to bytes for the API
+    photo_path = r"C:\Users\rashe\Pictures\IMG_298_2.jpg"
+    user_photo = Image.open(photo_path)
+    photo_buffer = io.BytesIO()
+    user_photo.save(photo_buffer, format="JPEG")
+    photo_bytes = photo_buffer.getvalue()
 
-CRITICAL STYLE REQUIREMENTS:
+    portrait_prompt = f"""Transform this person into a stylized space explorer portrait.
+
+PRESERVE from the original photo:
+- The person's facial features, face shape, and likeness
+- Their general expression and personality
+- Any distinctive features (glasses, facial hair, etc.)
+
+TRANSFORM with this style:
 - Digital illustration style, clean lines, vibrant saturated colors
-- Futuristic but weathered space suit with visible mission patches
-- Background: Pure solid white (#FFFFFF) - absolutely no gradients, patterns, or elements
-- Frame: Head and shoulders only, 3/4 view facing slightly left
+- Add a futuristic space suit with the name "{USERNAME}" on a shoulder patch
+- Suit color: {SUIT_COLOR}
+- Background: Pure solid white (#FFFFFF) - no gradients or elements
+- Frame: Head and shoulders, 3/4 view facing slightly left
 - Lighting: Soft diffused studio lighting, no harsh shadows
-- Expression: Determined but approachable
-- Art style: Modern animated movie character portrait (similar to Pixar or Dreamworks style)
+- Art style: Modern animated movie character (Pixar/Dreamworks aesthetic)
 
+The result should be clearly recognizable as THIS specific person, illustrated as a heroic space explorer.
 The white background is essential - the avatar will be composited onto a map."""
 
-    print("🎨 Generating your portrait...")
-    portrait_response = chat.send_message(portrait_prompt)
+    print("🎨 Transforming your photo into an explorer portrait...")
+
+    # Send both the text prompt AND the photo image to Gemini
+    portrait_response = chat.send_message([
+        portrait_prompt,
+        types.Part.from_bytes(data=photo_bytes, mime_type="image/jpeg")
+    ])
 
     # Extract the image from the response.
-    # Gemini returns a response with multiple "parts" - we need to find the image part.
     portrait_image = None
     for part in portrait_response.candidates[0].content.parts:
         if part.inline_data is not None:
-            # Found the image! Convert from bytes to PIL Image and save.
             image_bytes = part.inline_data.data
             portrait_image = Image.open(io.BytesIO(image_bytes))
             portrait_image.save("outputs/portrait.png")
@@ -135,7 +148,7 @@ The white background is essential - the avatar will be composited onto a map."""
 
     if portrait_image is None:
         raise Exception("Failed to generate portrait - no image in response")
-    print("✓ Portrait generated!")
+    print("✓ Portrait generated from your photo!")
 
     # =========================================================================
     # MODULE_5_STEP_3_GENERATE_ICON
