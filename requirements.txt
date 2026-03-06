@@ -1,0 +1,31 @@
+# Core Google AI Libraries
+google-genai>=1.0.0
+google-cloud-aiplatform>=1.70.0
+google-generativeai>=0.8.0
+
+# Agent Development Kit
+agent-framework>=1.0.0b260212
+
+# Web Framework (for APIs/UI)
+fastapi>=0.115.0
+uvicorn>=0.32.0
+
+# Audio Processing (for voice agents)
+pyaudio>=0.2.14
+sounddevice>=0.5.0
+numpy>=2.0.0
+
+# Image Processing (for vision agents)
+pillow>=11.0.0
+opencv-python>=4.10.0
+
+# Utilities
+python-dotenv>=1.0.0
+pydantic>=2.10.0
+httpx>=0.28.0
+aiohttp>=3.11.0
+
+# Development Tools
+pytest>=8.3.0
+black>=24.10.0
+ruff>=0.8.0
