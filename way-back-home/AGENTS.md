@@ -193,6 +193,11 @@ Before executing ANY level, perform **3 review passes**. Each pass catches what 
 > **Rule: Do NOT execute until Pass 3 finds zero new actionable items.** If it does, run Pass 4.
 > Save `implementation_plan.md` to `level_X/` after review is complete. Commit: `docs: level X implementation plan (reviewed)`.
 
+### After Completing Each Level
+- [ ] Update `PLAN.md` — mark level ✅, add architecture summary and GCP resources
+- [ ] Update `DEVLOG.md` — add full step-by-step section with commands, TODOs table, and verification results
+- [ ] `git add && git commit && git push` — all changes including docs
+
 ---
 
 ## Reference
