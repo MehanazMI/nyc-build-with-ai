@@ -17,6 +17,18 @@
 | **L4** | Dispatch Agent | 🔴 Not started | Dispatch agent, hazard DB, A2A protocol |
 | **L5** | Coordinate Group Rescue | 🔴 Not started | Kafka, agent-to-agent comms, satellites |
 
+### Rank Progression
+
+| Level Completed | Rank | Meaning |
+|-----------------|------|---------|
+| — | **Stranded** | Just crashed on the alien planet |
+| L0 | **Survivor** | Generated identity, registered on the map |
+| L1 | **Explorer** | Pinpointed crash location, activated beacon |
+| L2 | **Navigator** | Built survivor network, can search + navigate connections |
+| L3 | **Pathfinder** | Processing SOS signals, responding to emergencies |
+| L4 | **Homebound** | Dispatching rescue agents, coordinating routes home |
+| L5 | **Rescued** | Full group rescue complete — you made it home |
+
 ---
 
 ## ✅ Level 0 — Identify Yourself (Complete)
