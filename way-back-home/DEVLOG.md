@@ -415,9 +415,64 @@ npm run dev  # Serves on :5173, proxies /ws to :8080
 
 ---
 
-## 🔴 Level 4 — Dispatch Agent (Planned)
+## ✅ Level 4 — Dispatch Agent (A2A Protocol)
 
-*This section will be filled in as we build Level 4.*
+### Architecture
+
+Two-agent A2A system with Redis backend:
+
+```
+Browser (screen share + mic) ──WebSocket──► Dispatch Agent (:8082)
+                                              ├── monitor_for_hazard (video → Gemini → hazard detection)
+                                              └── execute_architect ──A2A──► Architect Agent (:8081)
+                                                                               └── lookup_schematic_tool → Redis (:6379)
+```
+
+### Steps Taken
+
+1. Created `.env` with Vertex AI + Redis + Architect URL vars
+2. Installed Redis via `winget install Redis.Redis` (auto-starts as service on :6379)
+3. Loaded `schematics.redis` seed data (10 ship blueprints → Redis lists)
+4. Created `architect_agent/` module (5 files: agent.py, server.py, __init__.py, requirements.txt, Dockerfile)
+5. Filled 3 markers in `dispatch_agent/agent.py` (RemoteA2aAgent, monitor_for_hazard, tools)
+6. Filled 3 markers in `backend/main.py` (RunConfig, upstream task, downstream task)
+7. Relaxed `pydantic>=2.11.7` in `pyproject.toml` for Python 3.14 compatibility
+8. Changed frontend dev fallback to port 8082 (ghost process on 8000)
+9. `uv sync` (115 packages) + `npm install` (331 packages) + `npm run build` (1362 modules)
+
+### Markers Filled (6 total)
+
+| # | File | Marker | Implementation |
+|---|------|--------|---------------|
+| 1 | `dispatch_agent/agent.py` | `REPLACE-REMOTEA2AAGENT` | `RemoteA2aAgent` pointing to architect on :8081 |
+| 2 | `dispatch_agent/agent.py` | `REPLACE_MONITOR_HAZARD` | Async generator: monitors video frames via Gemini for glowing parts |
+| 3 | `dispatch_agent/agent.py` | `REPLACE_AGENT_TOOLS` | `[AgentTool(agent=architect_agent), monitor_for_hazard]` |
+| 4 | `backend/main.py` | `REPLACE_RUN_CONFIG` | RunConfig with BIDI streaming, audio transcription, proactivity |
+| 5 | `backend/main.py` | `PROCESS_AGENT_REQUEST` | Upstream: handles binary audio, JSON text/audio/image |
+| 6 | `backend/main.py` | `PROCESS_AGENT_RESPONSE` | Downstream: logs tool calls, transcripts; forwards to WebSocket |
+
+### New Files Created (5 + 2)
+
+| File | Purpose |
+|------|---------|
+| `architect_agent/agent.py` | Redis lookup tool + agent definition |
+| `architect_agent/server.py` | A2A server via `to_a2a()` on port 8081 |
+| `architect_agent/__init__.py` | Package init |
+| `architect_agent/requirements.txt` | Standalone deps |
+| `architect_agent/Dockerfile` | Container build |
+| `schematics.redis` | 10 ship blueprints seed data |
+| `backend/.env` | Environment variables |
+
+### Verification
+
+- ✅ Architect agent starts on :8081 (A2A protocol)
+- ✅ Dispatch agent starts on :8082 (WebSocket + Gemini Live)
+- ✅ Redis running on :6379 with seed data
+- ✅ WebSocket connects successfully
+- ✅ Frontend shows MISSION BRAVO "ENGINEER STATION" UI
+- ✅ Status: CONNECTED after clicking "INITIATE UPLINK"
+- ✅ Screen share + microphone active
+- ✅ Mission log shows real-time transcription
 
 ---
 

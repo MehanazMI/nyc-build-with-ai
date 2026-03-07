@@ -210,7 +210,7 @@ export default function VolatileWorkbench() {
 
             // Dev Fallback: If running on Vite port 5173, assume backend is at 8000
             if (host.includes(":5173")) {
-                host = "localhost:8000";
+                host = "localhost:8082";
             }
 
             const wsUrl = `${protocol}//${host}/ws/user1/${sessionId}`;

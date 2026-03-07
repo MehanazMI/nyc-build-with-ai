@@ -14,7 +14,7 @@
 | **L1** | Pinpoint crash location | ✅ Complete | ADK, MCP servers, ParallelAgent, BigQuery |
 | **L2** | Survivor Network | ✅ Complete | Cloud Spanner, Property Graph, RAG, Vertex AI |
 | **L3** | Process SOS signals | ✅ Complete | FastAPI, Gemini Live API, WebSocket, native audio |
-| **L4** | Dispatch Agent | 🔴 Not started | Dispatch agent, hazard DB, A2A protocol |
+| **L4** | Dispatch Agent | ✅ Complete | A2A SDK, RemoteA2aAgent, Redis, hazard monitoring, Gemini Live |
 | **L5** | Coordinate Group Rescue | 🔴 Not started | Kafka, agent-to-agent comms, satellites |
 
 ### Rank Progression
