@@ -112,22 +112,25 @@ def generate_explorer_avatar() -> dict:
 
     portrait_prompt = f"""Transform this person into a stylized space explorer portrait.
 
-PRESERVE from the original photo:
-- The person's facial features, face shape, and likeness
-- Their general expression and personality
-- Any distinctive features (glasses, facial hair, etc.)
+PHOTO LIKENESS — THIS IS THE #1 PRIORITY:
+- You MUST preserve the EXACT face shape, jawline, chin, and forehead proportions
+- Match the EXACT eye shape, eye spacing, nose shape, and lip shape from the photo
+- Preserve skin tone, hair color, hair texture, and hairstyle exactly
+- Keep any distinctive features (glasses, facial hair, moles, dimples, etc.)
+- The final image must be IMMEDIATELY recognizable as this SPECIFIC person
+- Do NOT idealize, slim, or beautify the face — keep it true to the photo
 
-TRANSFORM with this style:
+STYLE ADDITIONS (without losing likeness):
 - Digital illustration style, clean lines, vibrant saturated colors
 - Add a futuristic space suit with the name "{USERNAME}" on a shoulder patch
 - Suit color: {SUIT_COLOR}
-- Background: Pure solid white (#FFFFFF) - no gradients or elements
+- Background: Pure solid white (#FFFFFF) — no gradients or other elements
 - Frame: Head and shoulders, 3/4 view facing slightly left
 - Lighting: Soft diffused studio lighting, no harsh shadows
-- Art style: Modern animated movie character (Pixar/Dreamworks aesthetic)
+- Art style: Semi-realistic illustrated (NOT heavily cartoonish — keep the real face structure)
 
-The result should be clearly recognizable as THIS specific person, illustrated as a heroic space explorer.
-The white background is essential - the avatar will be composited onto a map."""
+If you had to choose between style and likeness, ALWAYS choose likeness.
+The white background is essential — the avatar will be composited onto a map."""
 
     print("🎨 Transforming your photo into an explorer portrait...")
 
@@ -171,17 +174,19 @@ The white background is essential - the avatar will be composited onto a map."""
     # Second turn: Generate a consistent icon for the map.
     # Because we're in the same chat session, Gemini remembers the character
     # from the portrait and will maintain visual consistency.
-    icon_prompt = """Now create a circular map icon of this SAME character.
+    icon_prompt = """Now create a SMALL CIRCULAR BADGE icon of this same character for use as a tiny map marker.
 
-CRITICAL REQUIREMENTS:
-- SAME person, SAME face, SAME expression, SAME suit — maintain perfect consistency with the portrait
-- Tighter crop: just the head and very top of shoulders
+THIS MUST LOOK VERY DIFFERENT FROM THE PORTRAIT:
+- EXTREME CLOSE-UP: Only the FACE fills the entire frame — no neck, no shoulders, no suit visible
+- The face should fill at least 90% of the image area
+- Circular composition: imagine the image will be masked into a circle
 - Background: Pure solid white (#FFFFFF)
-- Optimized for small display sizes (will be used as a 64px map marker)
-- Keep the exact same art style, colors, and lighting as the portrait
 - Square 1:1 aspect ratio
+- Bold, thick outlines around the face for visibility at small sizes (32-64px)
+- Slightly simplified details compared to portrait — optimized for tiny display
+- Add a thin colored border/ring around the edge in {SUIT_COLOR} color
 
-This icon must be immediately recognizable as the same character from the portrait."""
+Same person, same face, same likeness — but this is a BADGE/AVATAR icon, NOT another portrait."""
 
     print("🖼️  Creating map icon...")
     icon_response = chat.send_message(icon_prompt)
@@ -192,12 +197,24 @@ This icon must be immediately recognizable as the same character from the portra
         if part.inline_data is not None:
             image_bytes = part.inline_data.data
             icon_image = Image.open(io.BytesIO(image_bytes))
-            icon_image.save("outputs/icon.png")
             break
 
     if icon_image is None:
         raise Exception("Failed to generate icon - no image in response")
-    print("✓ Icon generated!")
+
+    # Crop to circle and resize to icon dimensions
+    icon_size = 256  # Generate at 256px, will display at 64px
+    icon_image = icon_image.resize((icon_size, icon_size), Image.LANCZOS)
+
+    # Apply circular mask
+    mask = Image.new("L", (icon_size, icon_size), 0)
+    from PIL import ImageDraw
+    draw = ImageDraw.Draw(mask)
+    draw.ellipse((0, 0, icon_size - 1, icon_size - 1), fill=255)
+    icon_image.putalpha(mask)
+
+    icon_image.save("outputs/icon.png")
+    print("✓ Icon generated (circular crop applied)!")
 
     return {
         "portrait_path": "outputs/portrait.png",
