@@ -5,6 +5,23 @@
 
 ---
 
+## ⚠️ Critical: Repository Structure
+
+This repo has two parallel folder systems — **do not confuse them**:
+
+| Folder | What it is | What to do |
+|--------|-----------|------------|
+| `level_0/`, `level_1/`, `level_2/` ... | **Starter code** with `#REPLACE` placeholders | ✅ **Edit these** — implement the placeholders |
+| `solutions/level_0/`, `solutions/level_1/` ... | **Complete reference implementations** | 🔍 **Read-only** — use as reference when stuck |
+
+**Workflow:**
+1. Work in `level_X/` — find `#REPLACE` or `#TODO` comments and implement them
+2. If stuck on what to implement, read the corresponding file in `solutions/level_X/`
+3. Never copy-paste blindly from solutions — understand *why* before implementing
+4. The `solutions/` folder came from the upstream workshop repo (`google-americas/way-back-home`) and should never be committed to
+
+---
+
 ## Project Overview
 
 Way Back Home is a multi-level Google Cloud AI hackathon project. A space explorer (ExplorerMz) has crashed on an alien planet and must use AI agents to get rescued. Each level builds a different AI system.
