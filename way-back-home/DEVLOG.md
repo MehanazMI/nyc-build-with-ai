@@ -360,9 +360,58 @@ cd level_2/frontend && npm install && npm run dev
 
 ---
 
-## 🔴 Level 3 — Process SOS Signals (Planned)
+## ✅ Level 3 — Process SOS Signals (Biometric Scanner)
 
-*This section will be filled in as we build Level 3.*
+**Date:** 2026-03-07 | **Codelab:** Level 3
+
+### Step 1 — Configure Environment (`backend/app/.env`)
+```env
+GOOGLE_GENAI_USE_VERTEXAI=true
+GOOGLE_CLOUD_PROJECT=ai-hack-489018
+GOOGLE_CLOUD_LOCATION=us-central1
+MODEL_ID=gemini-live-2.5-flash-preview-native-audio-09-2025
+```
+
+### Step 2 — Fill 8 Markers Across 2 Files
+
+| File | Markers | What Was Implemented |
+|------|---------|----------------------|
+| `biometric_agent/agent.py` | 4 | `report_digit(count)` tool, MODEL_ID from env, `tools=[report_digit]`, full scanner instruction |
+| `main.py` | 4 | `session_service` + `Runner`, session init (native audio detection, RunConfig), live request (upstream/downstream tasks), response sorting (event logging) |
+
+### Step 3 — Install Dependencies & Build Frontend
+```bash
+cd level_3 && python -m uv sync  # 113 Python packages
+cd frontend && npm install && npm run build  # 219 npm packages → dist/
+```
+
+### Step 4 — Run Locally
+```bash
+# Backend (from backend/app/ directory)
+cd level_3/backend/app
+python main.py  # Serves on :8080
+
+# Frontend (separate Vite dev server)
+cd level_3/frontend
+npm run dev  # Serves on :5173, proxies /ws to :8080
+```
+
+### Verification Results
+| Test | Result |
+|------|--------|
+| Backend starts on :8080 | ✅ Startup complete, serving static files |
+| Frontend loads at :5173 | ✅ "MISSION ALPHA" scanner UI with codes, timer, instructions |
+| Neural Sync button | ✅ Shows "INITIALIZING NEURAL LINK..." → displays biometric codes (3,2,5,1) |
+| WebSocket connection | ⚠️ Drops in headless browser (no camera/mic available — expected) |
+
+### Key Differences from Previous Levels
+| Aspect | Level 2 | Level 3 |
+|--------|---------|---------|
+| Agent type | Request-response | **Live streaming** (bidirectional) |
+| Communication | REST API (`/api/chat`) | **WebSocket** (`/ws/{user}/{session}`) |
+| Model | gemini-2.5-flash | **gemini-live-2.5-flash-preview-native-audio** |
+| Input | Text queries | **Real-time audio + video frames** |
+| Output | JSON responses | **Streaming events** (audio, transcripts, tool calls) |
 
 ---
 

@@ -13,7 +13,7 @@
 | **L0** | Generate explorer identity | ✅ Complete | Gemini image generation, multi-turn chat |
 | **L1** | Pinpoint crash location | ✅ Complete | ADK, MCP servers, ParallelAgent, BigQuery |
 | **L2** | Survivor Network | ✅ Complete | Cloud Spanner, Property Graph, RAG, Vertex AI |
-| **L3** | Process SOS signals | 🔴 Not started | FastAPI, event-driven agents, A2A |
+| **L3** | Process SOS signals | ✅ Complete | FastAPI, Gemini Live API, WebSocket, native audio |
 | **L4** | Dispatch Agent | 🔴 Not started | Dispatch agent, hazard DB, A2A protocol |
 | **L5** | Coordinate Group Rescue | 🔴 Not started | Kafka, agent-to-agent comms, satellites |
 
@@ -113,13 +113,30 @@ React Frontend (port 5173)
 
 ---
 
-## 🔴 Level 3 — Process SOS Signals
+## ✅ Level 3 — Process SOS Signals (Complete)
 
-**Goal:** Build an event-driven agent that listens for and processes incoming SOS broadcasts from other survivors.
+**Goal:** Build a real-time biometric scanner using Gemini Live API and bidirectional WebSocket streaming.
 
-**Key Tech:** FastAPI, event-driven agents, A2A (Agent-to-Agent) protocol
+**What was built:**
+- **Biometric Agent** — ADK agent with `report_digit` tool, native audio model
+- **WebSocket server** — bidirectional streaming (upstream: browser→queue, downstream: Gemini→browser)
+- **React frontend** — "MISSION ALPHA" scanner UI with countdown timer, biometric codes, hand gesture detection
+- **Native audio** — supports proactive audio, affective dialog, input/output transcription
 
-**Files:** `level_3/backend/`, `level_3/frontend/`
+**Architecture:**
+```
+Browser (camera + mic) ──WebSocket──► FastAPI (port 8080)
+                                         ├── upstream_task: WS → LiveRequestQueue
+                                         ├── downstream_task: runner.run_live() → WS
+                                         └── biometric_agent (ADK Agent)
+                                              ├── model: gemini-live-2.5-flash-preview-native-audio
+                                              ├── tool: report_digit(count)
+                                              └── detects fingers, calls tool, confirms verbally
+```
+
+**8 markers filled across 2 files** (`agent.py` — 4, `main.py` — 4).
+
+**Files:** `level_3/backend/app/`, `level_3/frontend/`
 
 ---
 
