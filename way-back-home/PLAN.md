@@ -12,7 +12,7 @@
 |-------|---------|--------|----------|
 | **L0** | Generate explorer identity | ✅ Complete | Gemini image generation, multi-turn chat |
 | **L1** | Pinpoint crash location | ✅ Complete | ADK, MCP servers, ParallelAgent, BigQuery |
-| **L2** | Survivor Network | 🔴 Not started | Cloud Spanner, Property Graph, RAG, Vertex AI |
+| **L2** | Survivor Network | ✅ Complete | Cloud Spanner, Property Graph, RAG, Vertex AI |
 | **L3** | Process SOS signals | 🔴 Not started | FastAPI, event-driven agents, A2A |
 | **L4** | Dispatch Agent | 🔴 Not started | Dispatch agent, hazard DB, A2A protocol |
 | **L5** | Coordinate Group Rescue | 🔴 Not started | Kafka, agent-to-agent comms, satellites |
@@ -65,18 +65,37 @@ MissionAnalysisAI (Root Agent)
 
 ---
 
-## 🔴 Level 2 — Survivor Network (Next)
+## ✅ Level 2 — Survivor Network (Complete)
 
 **Goal:** Build a graph-based survivor social network with AI-powered natural language querying.
 
-**What to build:**
-- **Cloud Spanner** Property Graph (`SurvivorGraph`) with nodes: Survivors, Skills, Resources, Biomes
-- **FastAPI backend** with Vertex AI agent for natural language → GQL queries
-- **React frontend** with interactive graph visualization
-- **Smart Router** — picks best search: keyword / semantic RAG / hybrid
-- **Field Report processor** — multimodal AI extracts survivor data from uploaded images → updates graph
+**What was built:**
+- **Cloud Spanner** Property Graph (`SurvivorGraph`) — Survivors, Skills, Needs, Resources, Biomes
+- **FastAPI backend** with ADK agent — hybrid search (keyword + RAG/embeddings + combined)
+- **React frontend** — 3D space-themed graph visualization + Mission Control AI chat
+- **Multimedia pipeline** — SequentialAgent for upload → extract → save → summarize
+- **Optional Memory Bank** — session persistence via Vertex AI Agent Engine
 
-**Key Tech:** Cloud Spanner Graph, GQL, Vertex AI, hybrid search, React, Zustand
+**Architecture:**
+```
+FastAPI Backend (port 8000)
+├── /health, /api/chat, /api/graph, /api/upload
+├── survivor_network_agent (ADK Agent)
+│   ├── hybrid_search, semantic_search, keyword_search, find_similar_skills
+│   ├── get_survivors_with_skill, get_all_survivors, get_urgent_needs
+│   └── MultimediaExtractionPipeline (SequentialAgent)
+│       └── upload → extraction → spanner_save → summary
+├── HybridSearchService → Cloud Spanner (keyword + RAG via ML.PREDICT)
+├── GraphService → Cloud Spanner Property Graph (GQL queries)
+└── GCSService → Cloud Storage (media uploads)
+
+React Frontend (port 5173)
+├── 3D graph visualization (Three.js)
+├── Mission Control AI chat panel
+└── Hand tracking camera control
+```
+
+**13 TODOs filled across 7 files**, verified with 3-pass review protocol.
 
 **Files:** `level_2/backend/`, `level_2/frontend/`
 
@@ -132,3 +151,6 @@ MissionAnalysisAI (Root Agent)
 | Artifact Registry | `way-back-home` (Docker) |
 | MCP Server (Cloud Run) | `https://location-analyzer-avamvnovja-uc.a.run.app` |
 | BigQuery Dataset | `ai-hack-489018.way_back_home.star_catalog` |
+| Spanner Instance | `survivor-network` (ENTERPRISE) |
+| Spanner Database | `graph-db` / Graph: `SurvivorGraph` |
+| GCS Bucket | `gs://survivor-network-media-ai-hack-489018` |

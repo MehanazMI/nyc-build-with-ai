@@ -289,11 +289,74 @@ In ADK Web UI → select `agent` → send:
 
 ---
 
-## 🔴 Level 2 — Survivor Network (Coming Next)
+## ✅ Level 2 — Survivor Network
 
-**What:** Graph-based survivor network with Cloud Spanner, AI natural language querying, React frontend.
+**Date:** 2026-03-07 | **Codelab:** https://codelabs.developers.google.com/way-back-home-level-2/instructions
 
-*This section will be filled in as we build Level 2.*
+### Step 1 — Enable GCP APIs & Create Resources
+```bash
+gcloud services enable spanner.googleapis.com storage.googleapis.com --project=ai-hack-489018
+gcloud storage buckets create gs://survivor-network-media-ai-hack-489018 --location=us-central1
+```
+
+### Step 2 — Configure Environment (`backend/.env`)
+```env
+PROJECT_ID=ai-hack-489018
+INSTANCE_ID=survivor-network
+DATABASE_ID=graph-db
+GRAPH_NAME=SurvivorGraph
+REGION=us-central1
+LOCATION=us-central1
+USE_MEMORY_BANK=false
+GCS_BUCKET_NAME=survivor-network-media-ai-hack-489018
+GOOGLE_GENAI_USE_VERTEXAI=true
+GOOGLE_CLOUD_PROJECT=ai-hack-489018
+GOOGLE_CLOUD_LOCATION=us-central1
+```
+
+### Step 3 — Provision Spanner (Fully Automated)
+```bash
+python -m uv run python setup_data.py --project=ai-hack-489018
+```
+`setup_data.py` handles everything: ENTERPRISE instance → database + schema → sample data (4 survivors, skills, needs, resources, biomes) → `SurvivorGraph` property graph.
+
+### Step 4 — Fill 13 TODOs Across 7 Files
+
+| File | TODOs | What Was Implemented |
+|------|-------|----------------------|
+| `agent/agent.py` | 6 | `add_session_to_memory` callback, `semantic_search` in instruction + tools, `PreloadMemoryTool`, `sub_agents=[multimedia_agent]`, `after_agent_callback` |
+| `api/routes/chat.py` | 3 | `VertexAiSessionService`/`VertexAiMemoryBankService`, `InMemorySessionService`/`InMemoryMemoryService`, `Runner` init |
+| `agent/tools/hybrid_search_tools.py` | 1 | Full `semantic_search()` — forces RAG via `SearchMethod.RAG` |
+| `agent/multimedia_agent.py` | 1 | `sub_agents=[upload_agent, extraction_agent, spanner_agent, summary_agent]` |
+| `services/hybrid_search_service.py` | 1 | RAG SQL with `ML.PREDICT(MODEL TextEmbeddings, ...)` + `COSINE_DISTANCE` |
+| `deploy_agent.py` | 1 | Custom memory topics: search_preferences, location_interests, etc. |
+
+**Review process:** 3-pass iterative review (Scope → Deep Scan → Full Diff). Found 3 additional cosmetic-only diffs (`main.py`, `extraction_tools.py`, `gcs_service.py` — whitespace only).
+
+### Step 5 — Run Locally
+```bash
+# Backend
+cd level_2/backend && python -m uv run uvicorn main:app --reload --port 8000
+
+# Frontend
+cd level_2/frontend && npm install && npm run dev
+```
+
+### Verification Results
+| Test | Result |
+|------|--------|
+| `GET /health` | ✅ `{"status": "ok"}` |
+| 3D graph visualization | ✅ Renders survivors, skills, needs, resources, biomes |
+| Chat: "Show me all survivors" | ✅ David Chen (FOSSILIZED), Dr. Elena Frost (CRYO), Lt. Sarah Park (BIOLUMINESCENT), Captain Yuki Tanaka (VOLCANIC) |
+
+### Key Differences from Level 1
+| Aspect | Level 1 | Level 2 |
+|--------|---------|---------|
+| Agent framework | ADK `ParallelAgent` | ADK `Agent` + `SequentialAgent` |
+| Database | BigQuery (read-only) | Cloud Spanner (read-write + graph) |
+| Search | MCP tool calls | Hybrid: keyword + RAG (embeddings) |
+| Frontend | ADK Web UI (built-in) | Custom React app (3D graph viz) |
+| Package manager | pip | uv |
 
 ---
 
