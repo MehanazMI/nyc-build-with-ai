@@ -159,6 +159,42 @@ gcloud builds submit --config=cloudbuild.yaml \
 
 ---
 
+## ⚠️ Mandatory: Iterative Review Protocol
+
+Before executing ANY level, perform **3 review passes**. Each pass catches what the previous one missed.
+
+**Pass 1 — Scope Discovery** *(quick — will always miss things)*
+- Read the level `README.md` and referenced docs
+- List files that need changes, identify architecture and dependencies
+- Draft initial plan with phases, files, and estimated effort
+
+**Pass 2 — Deep Scan** *(thorough — catches most gaps)*
+- `grep -rn "TODO\|REPLACE\|FIXME" level_X/ --include="*.py" --include="*.ts"`
+- Read every TODO file line-by-line, map each to its `solutions/level_X/` counterpart
+- Check for unlisted dependencies: env vars, GCP APIs, buckets, IAM roles
+- Update plan with corrected counts; record what Pass 1 missed
+
+**Pass 3 — Full Diff & Validation** *(comprehensive — catches everything)*
+- Hash-compare ALL starter files vs solutions (not just TODO files)
+- Classify diffs: `actionable` (logic) vs `cosmetic` (whitespace)
+- Verify `.env` template covers every `os.getenv()` in the codebase
+- Confirm infra commands are complete and correctly ordered
+- Verify test plan has specific commands + expected outputs
+- Record what Pass 2 missed
+
+**Review Audit Table (required in every plan):**
+
+| Pass | TODOs Found | Files Diffed | New Issues vs Previous |
+|------|------------|-------------|----------------------|
+| 1 — Scope | _count_ | — | _(baseline)_ |
+| 2 — Deep Scan | _count_ | _count_ | _what was missed_ |
+| 3 — Full Diff | _count_ | _all_ | _what was missed_ |
+
+> **Rule: Do NOT execute until Pass 3 finds zero new actionable items.** If it does, run Pass 4.
+> Save `implementation_plan.md` to `level_X/` after review is complete. Commit: `docs: level X implementation plan (reviewed)`.
+
+---
+
 ## Reference
 
 - [PLAN.md](PLAN.md) — Level-by-level progress
