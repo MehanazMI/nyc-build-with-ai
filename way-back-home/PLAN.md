@@ -1,0 +1,134 @@
+# 🚀 Way Back Home — Project Plan
+
+**Explorer:** ExplorerMz | **Participant ID:** ee34c542 | **Event:** sandbox
+**Crash Site Coordinates:** (56, 66) | **Biome:** VOLCANIC (NE quadrant)
+**Live Map:** https://waybackhome.dev/e/sandbox
+
+---
+
+## Progress Overview
+
+| Level | Mission | Status | Key Tech |
+|-------|---------|--------|----------|
+| **L0** | Generate explorer identity | ✅ Complete | Gemini image generation, multi-turn chat |
+| **L1** | Pinpoint crash location | ✅ Complete | ADK, MCP servers, ParallelAgent, BigQuery |
+| **L2** | Survivor Network | 🔴 Not started | Cloud Spanner, Property Graph, RAG, Vertex AI |
+| **L3** | Process SOS signals | 🔴 Not started | FastAPI, event-driven agents, A2A |
+| **L4** | Dispatch Agent | 🔴 Not started | Dispatch agent, hazard DB, A2A protocol |
+| **L5** | Coordinate Group Rescue | 🔴 Not started | Kafka, agent-to-agent comms, satellites |
+
+---
+
+## ✅ Level 0 — Identify Yourself (Complete)
+
+**Goal:** Generate a unique explorer avatar and register on the world map.
+
+**What was built:**
+- Multi-turn Gemini image generation chat session
+- Portrait + icon generated in one consistent session (same art style)
+- **Bonus:** Photo-based avatar — real likeness preserved with space explorer style
+- Avatar registered via `create_identity.py` → ExplorerMz visible on live map
+
+**Files:** `level_0/generator.py`, `level_0/create_identity.py`
+
+---
+
+## ✅ Level 1 — Pinpoint Location (Complete)
+
+**Goal:** Build a multi-agent system to analyze crash site evidence and activate the rescue beacon.
+
+**Architecture:**
+```
+MissionAnalysisAI (Root Agent)
+├── before_agent_callback → fetches participant data, sets state
+├── EvidenceAnalysisCrew (ParallelAgent) ← runs 3 analysts concurrently
+│   ├── GeologicalAnalyst  → analyze_geological (custom MCP → Cloud Run)
+│   ├── BotanicalAnalyst   → analyze_botanical  (custom MCP → Cloud Run)
+│   └── AstronomicalAnalyst → extract_star_features (local) + execute_query (BigQuery MCP)
+└── confirm_location tool  → PATCH /participants/{id}/location → beacon activated
+```
+
+**Results:**
+- 🔬 Geological: **VOLCANIC 95%** (dark volcanic rock, sulfur, active lava crack)
+- 🌿 Botanical: **VOLCANIC 100%** (fire blooms, obsidian sprouts, crackling/rumbling audio)
+- ✅ 2-of-3 consensus → beacon activated at **(56, 66) · NE quadrant**
+
+**Key ADK Patterns learned:**
+- `before_agent_callback` for state setup without config file imports
+- `{key}` state templating in agent instructions
+- `ParallelAgent` for concurrent independent analyses
+- `MCPToolset` with `StreamableHTTPConnectionParams` (custom + Google Cloud MCP)
+- `ToolContext` for tools to read shared state
+- Mixing local `FunctionTool` with remote `MCPToolset` in one agent
+
+**Files:** `level_1/agent/`, `level_1/mcp-server/main.py`
+
+---
+
+## 🔴 Level 2 — Survivor Network (Next)
+
+**Goal:** Build a graph-based survivor social network with AI-powered natural language querying.
+
+**What to build:**
+- **Cloud Spanner** Property Graph (`SurvivorGraph`) with nodes: Survivors, Skills, Resources, Biomes
+- **FastAPI backend** with Vertex AI agent for natural language → GQL queries
+- **React frontend** with interactive graph visualization
+- **Smart Router** — picks best search: keyword / semantic RAG / hybrid
+- **Field Report processor** — multimodal AI extracts survivor data from uploaded images → updates graph
+
+**Key Tech:** Cloud Spanner Graph, GQL, Vertex AI, hybrid search, React, Zustand
+
+**Files:** `level_2/backend/`, `level_2/frontend/`
+
+---
+
+## 🔴 Level 3 — Process SOS Signals
+
+**Goal:** Build an event-driven agent that listens for and processes incoming SOS broadcasts from other survivors.
+
+**Key Tech:** FastAPI, event-driven agents, A2A (Agent-to-Agent) protocol
+
+**Files:** `level_3/backend/`, `level_3/frontend/`
+
+---
+
+## 🔴 Level 4 — Dispatch Agent
+
+**Goal:** Build an intelligent rescue dispatch agent that routes teams around hazard zones.
+
+**What to build:**
+- Dispatch agent with access to hazard database
+- Route planning that avoids dangerous areas
+- A2A communication to coordinate with other agents
+
+**Key Tech:** ADK dispatch agent, hazard DB (`hazard_db.py`), A2A protocol
+
+**Files:** `level_4/backend/dispatch_agent/`
+
+---
+
+## 🔴 Level 5 — Coordinate Group Rescue
+
+**Goal:** Full multi-agent orchestration — your agent communicates with a satellite agent via Kafka to coordinate the final group rescue.
+
+**What to build:**
+- Satellite agent (server) that manages rescue coordination
+- Kafka messaging bridge for agent-to-agent communication (`agent_to_kafka_a2a.py`)
+- Frontend dashboard showing rescue progress
+
+**Key Tech:** Apache Kafka, A2A over Kafka, satellite agents, event streaming
+
+**Files:** `level_5/agent/`, `level_5/satellite/`
+
+---
+
+## GCP Resources Used
+
+| Resource | Name / ID |
+|---|---|
+| Project | `ai-hack-489018` |
+| Region | `us-central1` |
+| Service Account | `way-back-home-sa@ai-hack-489018.iam.gserviceaccount.com` |
+| Artifact Registry | `way-back-home` (Docker) |
+| MCP Server (Cloud Run) | `https://location-analyzer-avamvnovja-uc.a.run.app` |
+| BigQuery Dataset | `ai-hack-489018.way_back_home.star_catalog` |
