@@ -89,6 +89,6 @@ multimedia_agent = SequentialAgent(
     name="MultimediaExtractionPipeline",
     description="Process media uploads: Upload -> Extract -> Save -> Summarize",
     
-    # TODO: REPLACE_ORCHESTRATION
+    sub_agents=[upload_agent, extraction_agent, spanner_agent, summary_agent]
 
 )

@@ -58,7 +58,13 @@ def register_agent_engine():
     # --- Define Custom Topics ---
     logger.info("Defining custom topics...")
     
-    # TODO: SET_UP_TOPIC
+    custom_topics = [
+        "search_preferences",
+        "location_interests", 
+        "skill_interests",
+        "needs_tracking",
+        "survivor_interactions"
+    ]
 
     # --- Define Few-Shot Examples ---
     logger.info("Defining few-shot examples...")
