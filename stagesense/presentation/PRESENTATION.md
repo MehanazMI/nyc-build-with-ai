@@ -74,8 +74,13 @@
 
 ## ✅ Pre-Demo Checklist
 
-- [ ] Server running: `cd stagesense/backend && uvicorn main:app --port 8080`
-- [ ] Dashboard open on laptop
-- [ ] Mobile page open on phone (same WiFi)
-- [ ] Mic permission granted
-- [ ] Test run: START SESSION → speak → confirm scores move
+- [ ] Server running (from `stagesense/backend/`):
+  ```powershell
+  $env:GOOGLE_GENAI_USE_VERTEXAI="true"; $env:GOOGLE_CLOUD_PROJECT="ai-hack-489018"; $env:GOOGLE_CLOUD_LOCATION="us-central1"
+  .venv\Scripts\uvicorn main:app --host 0.0.0.0 --port 8080
+  ```
+- [ ] Dashboard open on laptop: `http://localhost:8080/dashboard.html`
+- [ ] Mobile page open on phone (same WiFi): `http://localhost:8080/`
+- [ ] Mic permission granted on both
+- [ ] Test: START SESSION → speak → confirm scores move on dashboard
+- [ ] Voiceover ready: `presentation/i_studio.mp3` (play while showing architecture.png)
