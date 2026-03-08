@@ -1,6 +1,7 @@
 # StageSense — 5-Minute Demo Script
 
-> **The AI that sees what you can't.**
+> **Team: The Sixth Sense** | **Project: StageSense**
+> *The AI that sees what you can't.*
 
 ---
 

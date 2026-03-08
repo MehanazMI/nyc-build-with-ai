@@ -1,5 +1,7 @@
 # NYC Build With AI Hackathon
 
+> **Team: The Sixth Sense**
+
 ## Project: StageSense — The AI That Sees What You Can't
 
 An AI-powered live presentation coach built on Google ADK and Gemini Live API.
@@ -12,9 +14,12 @@ Real-time coaching for speakers AND audience engagement analysis — no text box
 
 ---
 
-## Team Members
+## Team
 
-- Abdul Rasheed with AI Agents
+**Team Name:** The Sixth Sense
+
+- Mehanaz MI
+- Abdul Rasheed
 
 ---
 
