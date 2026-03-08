@@ -1,12 +1,20 @@
 # StageSense 🎤
 
 > *The AI that sees what you can't.*
+> **NYC Build With AI Hackathon — Team: The Sixth Sense**
 
-An AI-powered live presentation coach with two modes:
-- **Coach Mode** — camera faces the speaker → real-time coaching on pace, clarity, energy, filler words
-- **Room Read Mode** — camera faces the audience → AI reads engagement, confusion, excitement
+---
 
-Built with Google ADK, Gemini Live API, FastAPI, SSE — on Google Cloud.
+## What It Does
+
+StageSense is a **live AI presentation coach** powered by Gemini Live API and Google ADK.
+
+Point your phone at the **speaker** → get real-time coaching on pace, clarity, energy, and filler words.  
+Point your phone at the **audience** → get live engagement, confusion, and excitement readings.
+
+No text boxes. No uploads. Just camera + mic → AI → live dashboard.
+
+---
 
 ## Team
 
@@ -15,38 +23,69 @@ Built with Google ADK, Gemini Live API, FastAPI, SSE — on Google Cloud.
 - Mehanaz MI
 - Abdul Rasheed
 
-## Setup
+---
 
-```bash
+## Demo Setup
+
+**Requirements:** Python 3.11+, Google Cloud project with ADC configured
+
+```powershell
 cd backend
-python -m venv .venv && .venv\Scripts\activate
+python -m venv .venv
+.venv\Scripts\activate
 pip install -r requirements.txt
 
-# Set env vars
-export GOOGLE_CLOUD_PROJECT=ai-hack-489018
-export GOOGLE_GENAI_USE_VERTEXAI=true
-export GOOGLE_CLOUD_LOCATION=us-central1
+# Configure (Windows)
+$env:GOOGLE_CLOUD_PROJECT = "ai-hack-489018"
+$env:GOOGLE_GENAI_USE_VERTEXAI = "true"
+$env:GOOGLE_CLOUD_LOCATION = "us-central1"
 
 # Run
 uvicorn main:app --host 0.0.0.0 --port 8080
 ```
 
-Open `frontend/index.html` on your phone, `frontend/dashboard.html` on the projector.
+| URL | Purpose |
+|-----|---------|
+| `http://localhost:8080/` | 📱 Mobile capture page (start session here) |
+| `http://localhost:8080/dashboard.html` | 💻 Live scorecard dashboard |
+
+---
 
 ## Architecture
 
 ```
-📱 Mobile (camera+mic) → WebSocket → FastAPI → Gemini Live
-                                         ↓
-                                    ADK Agent
-                                         ↓
-                                    SSE stream → 💻 Dashboard
+📱 Phone (camera + mic)
+        │
+        │  WebSocket (audio/video frames)
+        ▼
+┌─────────────────────────────────────┐
+│  FastAPI Backend                    │
+│  ├── /ws  ← WebSocket endpoint      │
+│  ├── /stream ← SSE dashboard feed   │
+│  └── /mode  ← coach / roomread      │
+│                                     │
+│  Google ADK Runner                  │
+│  └── LiveRequestQueue               │
+│        │                            │
+│        ▼                            │
+│  Gemini Live API (native audio)     │
+│  gemini-live-2.5-flash-preview      │
+└─────────────────────────────────────┘
+        │
+        │  SSE (score JSON every 0.5s)
+        ▼
+💻 Dashboard (live animated scorecard)
 ```
+
+---
 
 ## Tech Stack
 
-- **Google ADK** — CoachAgent + RoomReadAgent
-- **Gemini Live API** — real-time audio+video analysis
-- **FastAPI + WebSocket** — audio/video ingestion
-- **SSE** — live scorecard streaming to dashboard
-- **Cloud Run** — hosting
+| Component | Technology |
+|-----------|-----------|
+| Live AI | Gemini Live API — `gemini-live-2.5-flash-preview-native-audio` |
+| Agent framework | Google ADK — Runner + LiveRequestQueue |
+| Backend | FastAPI + WebSocket + SSE (Server-Sent Events) |
+| Frontend | Vanilla HTML/CSS/JS — no framework |
+| Hosting | Google Cloud Run |
+| Auth | Vertex AI + Application Default Credentials |

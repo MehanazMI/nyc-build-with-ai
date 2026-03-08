@@ -1,95 +1,81 @@
-# StageSense — 5-Minute Demo Script
+# StageSense — Demo Script
 
 > **Team: The Sixth Sense** | **Project: StageSense**
 > *The AI that sees what you can't.*
 
 ---
 
-## 🎯 Opening Hook (30 sec)
+## 🎯 Opening (30 sec)
 
-> *"Every presenter has a blind spot. You can't hear your own pace. You can't see your audience losing interest. StageSense is the AI that fills that gap — in real time, with zero text boxes."*
+> *"Every presenter has a blind spot. You can't hear your own filler words. You can't see your audience losing interest. StageSense is the AI that fills that gap — live, with no text boxes."*
 
 ---
 
-## 📱 Architecture Slide (30 sec)
+## 📐 How It Works (30 sec)
 
-Show the two-device setup:
+> *"Two phones. Two angles. One AI."*
 
 ```
-📱 Phone (Speaker)          💻 Laptop (Dashboard)
-   Camera + Mic       →       Live Scorecard
-   WebSocket          →       SSE Stream
-        ↓                          ↑
-   ┌──────────────────────────────────┐
-   │  Gemini Live API (Native Audio)  │
-   │  ADK Runner + LiveRequestQueue   │
-   │  FastAPI Backend on Cloud Run    │
-   └──────────────────────────────────┘
+📱 Phone → WebSocket → Gemini Live API → ADK Agent → SSE → 💻 Dashboard
 ```
 
-**Key phrase:** *"Phone captures. Gemini analyzes. Dashboard displays. All in real time."*
+- **Coach Mode**: face camera at speaker → live pace / clarity / energy / filler scores
+- **Room Read Mode**: face camera at audience → live engagement / confusion / excitement
 
 ---
 
 ## 🎤 Live Demo — Coach Mode (2 min)
 
-1. **Open dashboard** on laptop → projector: `http://localhost:8080/dashboard.html`
-2. **Open mobile page** on phone: `http://localhost:8080/`
-3. Tap **COACH** mode → Tap **START SESSION**
-4. **Start speaking** — narrate your demo naturally
-5. **Point to dashboard** — scores updating live:
-   - *"Watch my pace score... now I'll slow down... see it adjust"*
-   - *"Notice the filler count — um, like — it catches those"*
-   - *"The insight and action tips update every few seconds"*
-
-**If scores aren't moving:** The simulation fallback keeps the demo alive with realistic scores.
+1. Open **dashboard** on laptop: `http://localhost:8080/dashboard.html`
+2. Open **mobile page** on phone: `http://localhost:8080/`
+3. Select **COACH** → tap **START SESSION** → **speak**
+4. Narrate the demo — *"Watch pace score... I'll speed up... now slow... see it react"*
+5. *"Filler count — um, like — it catches every one"*
+6. *"Insight and action tips update every few seconds"*
 
 ---
 
 ## 👀 Live Demo — Room Read Mode (1 min)
 
-1. Tap **ROOM READ** on phone
-2. **Point camera at audience**
-3. *"Now StageSense flips — it's reading YOU, the audience"*
-4. Show engagement/confusion/excitement bars updating
-5. *"If I see confusion spiking, I know to explain that concept again"*
+1. Tap **ROOM READ** on phone → point camera at audience
+2. *"Now the AI flips — it reads YOU"*
+3. Show engagement / confusion / excitement bars updating live
+4. *"Confusion spiking? I know to re-explain. Excitement dropping? Time to land the point."*
 
 ---
 
-## 🏗 Technical Deep Dive (30 sec)
+## ⚙️ Tech (30 sec)
 
-> *"Under the hood:"*
-> - **Gemini Live API** with native audio model — real-time bidirectional streaming
-> - **Google ADK Runner** with LiveRequestQueue — same pattern as Way Back Home L3
-> - **FastAPI** backend: WebSocket ingests audio/video, SSE pushes scores to dashboard
-> - **No text box anywhere** — camera and microphone are the only input
-
----
-
-## 💡 Closing (30 sec)
-
-> *"StageSense coached me through THIS presentation. The very demo you just watched was being analyzed in real time. That's what breaking the text-box paradigm looks like."*
-
-**Mic drop moment:** Point to dashboard showing the scores from your demo.
+> - **Gemini Live API** — native audio model, real-time bidi streaming
+> - **Google ADK Runner + LiveRequestQueue** — same stack as Way Back Home
+> - **FastAPI** — WebSocket ingests A/V, SSE pushes scores to dashboard
+> - **Zero text boxes** — mic and camera are the only inputs
 
 ---
 
-## 🛡 Backup Plans
+## 💡 Close (30 sec)
 
-| If this happens... | Do this |
-|---------------------|---------|
-| Gemini Live doesn't connect | Simulation fallback auto-activates — dashboard still updates |
-| Phone mic doesn't work | Use laptop mic — open `http://localhost:8080/` on laptop too |
-| Dashboard doesn't load | Refresh with Ctrl+Shift+R |
-| Scores are all zeros | Speak louder / closer to mic — model needs speech audio |
+> *"StageSense coached me through THIS presentation. The scores on that dashboard? They were real. That's what breaking the text-box paradigm actually looks like."*
+
+**👉 Point to dashboard.** Mic drop.
 
 ---
 
-## 📋 Pre-Demo Checklist
+## 🛡 If Things Go Wrong
 
-- [ ] Server running: `.venv\Scripts\uvicorn main:app --host 0.0.0.0 --port 8080`
-- [ ] Dashboard open on laptop: `http://localhost:8080/dashboard.html`
-- [ ] Mobile page open on phone: `http://localhost:8080/`
-- [ ] Phone and laptop on same WiFi network
-- [ ] Test START SESSION → speak → see scores move
-- [ ] Browser mic permission granted
+| Issue | Fix |
+|-------|-----|
+| Scores stuck at zero | Speak louder — model responds to speech, not silence |
+| Session won't start | Refresh `http://localhost:8080/` |
+| Dashboard blank | Ctrl+Shift+R to hard refresh |
+| Gemini times out | Simulation fallback auto-activates — keep talking |
+
+---
+
+## ✅ Pre-Demo Checklist
+
+- [ ] Server running: `cd stagesense/backend && uvicorn main:app --port 8080`
+- [ ] Dashboard open on laptop
+- [ ] Mobile page open on phone (same WiFi)
+- [ ] Mic permission granted
+- [ ] Test run: START SESSION → speak → confirm scores move
