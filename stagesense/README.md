@@ -10,7 +10,10 @@ Built with Google ADK, Gemini Live API, FastAPI, SSE — on Google Cloud.
 
 ## Team
 
-- ExplorerMz
+**The Sixth Sense**
+
+- Mehanaz MI
+- Abdul Rasheed
 
 ## Setup
 
