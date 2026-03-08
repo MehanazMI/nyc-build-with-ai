@@ -1,259 +1,309 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>StageSense — Mobile Capture</title>
-<style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body {
-    background: #0a0a0f;
-    color: #fff;
-    font-family: 'Inter', system-ui, sans-serif;
-    height: 100dvh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 16px;
-    padding: 20px;
-  }
-  h1 { font-size: 1.4rem; letter-spacing: 0.1em; color: #7c3aed; }
-  .subtitle { font-size: 0.8rem; color: #666; text-align: center; }
-  video {
-    width: 100%;
-    max-width: 380px;
-    border-radius: 16px;
-    border: 2px solid #1e1e2e;
-    background: #111;
-    transform: scaleX(-1);
-  }
-  .mode-btns {
-    display: flex;
-    gap: 10px;
-    width: 100%;
-    max-width: 380px;
-  }
-  .mode-btn {
-    flex: 1;
-    padding: 12px;
-    border: 2px solid #333;
-    border-radius: 10px;
-    background: transparent;
-    color: #999;
-    font-size: 0.85rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s;
-    letter-spacing: 0.05em;
-  }
-  .mode-btn.active {
-    border-color: #7c3aed;
-    background: #7c3aed22;
-    color: #a78bfa;
-  }
-  .start-btn {
-    width: 100%;
-    max-width: 380px;
-    padding: 16px;
-    border-radius: 12px;
-    border: none;
-    background: linear-gradient(135deg, #7c3aed, #4f46e5);
-    color: #fff;
-    font-size: 1rem;
-    font-weight: 700;
-    cursor: pointer;
-    letter-spacing: 0.08em;
-    transition: all 0.2s;
-  }
-  .start-btn:disabled {
-    opacity: 0.4;
-    cursor: not-allowed;
-  }
-  .status {
-    font-size: 0.8rem;
-    color: #666;
-    text-align: center;
-  }
-  .status.live { color: #22c55e; animation: pulse 1.5s infinite; }
-  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.5} }
-  .whisper-box {
-    width: 100%;
-    max-width: 380px;
-    padding: 14px 16px;
-    background: #1e1e2e;
-    border-radius: 12px;
-    border-left: 3px solid #7c3aed;
-    font-size: 0.9rem;
-    color: #c4b5fd;
-    min-height: 52px;
-    display: flex;
-    align-items: center;
-  }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>StageSense — Mobile Capture</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: #0a0a0f;
+      color: #fff;
+      font-family: 'Inter', system-ui, sans-serif;
+      height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      padding: 20px;
+    }
+
+    h1 {
+      font-size: 1.4rem;
+      letter-spacing: 0.1em;
+      color: #7c3aed;
+    }
+
+    .subtitle {
+      font-size: 0.8rem;
+      color: #666;
+      text-align: center;
+    }
+
+    video {
+      width: 100%;
+      max-width: 380px;
+      border-radius: 16px;
+      border: 2px solid #1e1e2e;
+      background: #111;
+      transform: scaleX(-1);
+    }
+
+    .mode-btns {
+      display: flex;
+      gap: 10px;
+      width: 100%;
+      max-width: 380px;
+    }
+
+    .mode-btn {
+      flex: 1;
+      padding: 12px;
+      border: 2px solid #333;
+      border-radius: 10px;
+      background: transparent;
+      color: #999;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      letter-spacing: 0.05em;
+    }
+
+    .mode-btn.active {
+      border-color: #7c3aed;
+      background: #7c3aed22;
+      color: #a78bfa;
+    }
+
+    .start-btn {
+      width: 100%;
+      max-width: 380px;
+      padding: 16px;
+      border-radius: 12px;
+      border: none;
+      background: linear-gradient(135deg, #7c3aed, #4f46e5);
+      color: #fff;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      letter-spacing: 0.08em;
+      transition: all 0.2s;
+    }
+
+    .start-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    .status {
+      font-size: 0.8rem;
+      color: #666;
+      text-align: center;
+    }
+
+    .status.live {
+      color: #22c55e;
+      animation: pulse 1.5s infinite;
+    }
+
+    @keyframes pulse {
+
+      0%,
+      100% {
+        opacity: 1
+      }
+
+      50% {
+        opacity: 0.5
+      }
+    }
+
+    .whisper-box {
+      width: 100%;
+      max-width: 380px;
+      padding: 14px 16px;
+      background: #1e1e2e;
+      border-radius: 12px;
+      border-left: 3px solid #7c3aed;
+      font-size: 0.9rem;
+      color: #c4b5fd;
+      min-height: 52px;
+      display: flex;
+      align-items: center;
+    }
+  </style>
 </head>
+
 <body>
 
-<h1>⚡ STAGESENSE</h1>
+  <h1>⚡ STAGESENSE</h1>
 
-<div class="mode-btns">
-  <button class="mode-btn active" id="btn-coach" onclick="setMode('coach')">🎤 COACH</button>
-  <button class="mode-btn" id="btn-roomread" onclick="setMode('roomread')">👁 ROOM READ</button>
-</div>
+  <div class="mode-btns">
+    <button class="mode-btn active" id="btn-coach" onclick="setMode('coach')">🎤 COACH</button>
+    <button class="mode-btn" id="btn-roomread" onclick="setMode('roomread')">👁 ROOM READ</button>
+  </div>
 
-<video id="video" autoplay muted playsinline></video>
+  <video id="video" autoplay muted playsinline></video>
 
-<button class="start-btn" id="startBtn" onclick="toggleSession()">START SESSION</button>
+  <button class="start-btn" id="startBtn" onclick="toggleSession()">START SESSION</button>
 
-<div class="whisper-box" id="whisper">AI coaching will appear here...</div>
+  <div class="whisper-box" id="whisper">AI coaching will appear here...</div>
 
-<p class="status" id="status">Camera ready — choose mode and start</p>
+  <p class="status" id="status">Camera ready — choose mode and start</p>
 
-<script>
-const BACKEND = location.protocol === 'file:' 
-  ? 'ws://localhost:8080' 
-  : `${location.protocol === 'https:' ? 'wss' : 'ws'}://${location.host}`;
+  <script>
+    const BACKEND = location.protocol === 'file:'
+      ? 'ws://localhost:8080'
+      : `${location.protocol === 'https:' ? 'wss' : 'ws'}://${location.host}`;
 
-let ws = null;
-let mediaStream = null;
-let currentMode = 'coach';
-let sessionActive = false;
-let audioContext = null;
-let processor = null;
+    let ws = null;
+    let mediaStream = null;
+    let currentMode = 'coach';
+    let sessionActive = false;
+    let audioContext = null;
+    let processor = null;
+    let videoInterval = null; // Bug 6 FIX: store ID so we can clearInterval on stop
 
-async function setMode(mode) {
-  currentMode = mode;
-  document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
-  document.getElementById(`btn-${mode}`).classList.add('active');
-  
-  // Flip camera for room read mode
-  const video = document.getElementById('video');
-  video.style.transform = mode === 'coach' ? 'scaleX(-1)' : 'scaleX(1)';
-  
-  // Tell backend
-  if (sessionActive) {
-    await fetch(`/mode/${mode}`, { method: 'POST' });
-  }
+    async function setMode(mode) {
+      currentMode = mode;
+      document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById(`btn-${mode}`).classList.add('active');
 
-  // Switch camera facing
-  if (mediaStream) {
-    mediaStream.getTracks().forEach(t => t.stop());
-    await startCamera();
-  }
-}
+      // Flip camera for room read mode
+      const video = document.getElementById('video');
+      video.style.transform = mode === 'coach' ? 'scaleX(-1)' : 'scaleX(1)';
 
-async function startCamera() {
-  const facingMode = currentMode === 'coach' ? 'user' : 'environment';
-  try {
-    mediaStream = await navigator.mediaDevices.getUserMedia({
-      video: { facingMode, width: { ideal: 640 }, height: { ideal: 480 } },
-      audio: { noiseSuppression: true, echoCancellation: true, sampleRate: 16000 }
-    });
-    document.getElementById('video').srcObject = mediaStream;
-  } catch (e) {
-    // Fallback: try without facing mode constraint
-    mediaStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-    document.getElementById('video').srcObject = mediaStream;
-  }
-}
-
-async function toggleSession() {
-  if (sessionActive) stopSession();
-  else await startSession();
-}
-
-async function startSession() {
-  await startCamera();
-  
-  // Set mode on backend
-  await fetch(`/mode/${currentMode}`, { method: 'POST' });
-
-  // Open WebSocket
-  ws = new WebSocket(`${BACKEND}/ws`);
-  ws.binaryType = 'arraybuffer';
-
-  ws.onopen = () => {
-    sessionActive = true;
-    document.getElementById('startBtn').textContent = 'STOP SESSION';
-    document.getElementById('status').textContent = '🟢 Live — coaching active';
-    document.getElementById('status').className = 'status live';
-    startStreaming();
-  };
-
-  ws.onmessage = (ev) => {
-    try {
-      const msg = JSON.parse(ev.data);
-      if (msg.type === 'whisper' && msg.text) {
-        document.getElementById('whisper').textContent = '💬 ' + msg.text;
-        speakWhisper(msg.text);
+      // Tell backend
+      if (sessionActive) {
+        await fetch(`/mode/${mode}`, { method: 'POST' });
       }
-    } catch {}
-  };
 
-  ws.onclose = () => stopSession();
-}
-
-function stopSession() {
-  sessionActive = false;
-  ws?.close();
-  processor?.disconnect();
-  mediaStream?.getTracks().forEach(t => t.stop());
-  document.getElementById('startBtn').textContent = 'START SESSION';
-  document.getElementById('status').textContent = 'Session ended';
-  document.getElementById('status').className = 'status';
-}
-
-function startStreaming() {
-  if (!mediaStream) return;
-  audioContext = new AudioContext({ sampleRate: 16000 });
-  const source = audioContext.createMediaStreamSource(mediaStream);
-  processor = audioContext.createScriptProcessor(4096, 1, 1);
-  
-  processor.onaudioprocess = (e) => {
-    if (!ws || ws.readyState !== WebSocket.OPEN) return;
-    const input = e.inputBuffer.getChannelData(0);
-    const int16 = new Int16Array(input.length);
-    for (let i = 0; i < input.length; i++) {
-      int16[i] = Math.max(-32768, Math.min(32767, input[i] * 32768));
+      // Switch camera facing
+      if (mediaStream) {
+        mediaStream.getTracks().forEach(t => t.stop());
+        await startCamera();
+      }
     }
-    ws.send(int16.buffer);
-  };
 
-  source.connect(processor);
-  processor.connect(audioContext.destination);
+    async function startCamera() {
+      const facingMode = currentMode === 'coach' ? 'user' : 'environment';
+      try {
+        mediaStream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode, width: { ideal: 640 }, height: { ideal: 480 } },
+          audio: { noiseSuppression: true, echoCancellation: true, sampleRate: 16000 }
+        });
+        document.getElementById('video').srcObject = mediaStream;
+      } catch (e) {
+        // Fallback: try without facing mode constraint
+        mediaStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+        document.getElementById('video').srcObject = mediaStream;
+      }
+    }
 
-  // Send video frames every 1 second
-  const canvas = document.createElement('canvas');
-  canvas.width = 320; canvas.height = 240;
-  const ctx = canvas.getContext('2d');
-  const video = document.getElementById('video');
+    async function toggleSession() {
+      if (sessionActive) stopSession();
+      else await startSession();
+    }
 
-  setInterval(() => {
-    if (!sessionActive || ws?.readyState !== WebSocket.OPEN) return;
-    ctx.drawImage(video, 0, 0, 320, 240);
-    canvas.toBlob(blob => {
-      blob.arrayBuffer().then(buf => {
-        const prefix = new TextEncoder().encode('VID:');
-        const combined = new Uint8Array(prefix.length + buf.byteLength);
-        combined.set(prefix, 0);
-        combined.set(new Uint8Array(buf), prefix.length);
-        if (ws?.readyState === WebSocket.OPEN) ws.send(combined.buffer);
-      });
-    }, 'image/jpeg', 0.7);
-  }, 1000);
-}
+    async function startSession() {
+      await startCamera();
 
-function speakWhisper(text) {
-  if (!window.speechSynthesis) return;
-  const utt = new SpeechSynthesisUtterance(text);
-  utt.rate = 1.1;
-  utt.pitch = 0.9;
-  utt.volume = 0.8;
-  window.speechSynthesis.speak(utt);
-}
+      // Set mode on backend
+      await fetch(`/mode/${currentMode}`, { method: 'POST' });
 
-// Init camera on load
-window.onload = startCamera;
-</script>
+      // Open WebSocket
+      ws = new WebSocket(`${BACKEND}/ws`);
+      ws.binaryType = 'arraybuffer';
+
+      ws.onopen = () => {
+        sessionActive = true;
+        document.getElementById('startBtn').textContent = 'STOP SESSION';
+        document.getElementById('status').textContent = '🟢 Live — coaching active';
+        document.getElementById('status').className = 'status live';
+        startStreaming();
+      };
+
+      ws.onmessage = (ev) => {
+        try {
+          const msg = JSON.parse(ev.data);
+          if (msg.type === 'whisper' && msg.text) {
+            document.getElementById('whisper').textContent = '💬 ' + msg.text;
+            speakWhisper(msg.text);
+          }
+        } catch { }
+      };
+
+      ws.onclose = () => stopSession();
+    }
+
+    function stopSession() {
+      sessionActive = false;
+      // Bug 6 FIX: clear video frame interval — prevents stacked intervals on restart
+      clearInterval(videoInterval);
+      videoInterval = null;
+      // Bug 7 FIX: close AudioContext — prevents memory leak across sessions
+      processor?.disconnect();
+      audioContext?.close();
+      audioContext = null;
+      processor = null;
+      ws?.close();
+      mediaStream?.getTracks().forEach(t => t.stop());
+      document.getElementById('startBtn').textContent = 'START SESSION';
+      document.getElementById('status').textContent = 'Session ended';
+      document.getElementById('status').className = 'status';
+    }
+
+    function startStreaming() {
+      if (!mediaStream) return;
+      audioContext = new AudioContext({ sampleRate: 16000 });
+      const source = audioContext.createMediaStreamSource(mediaStream);
+      processor = audioContext.createScriptProcessor(4096, 1, 1);
+
+      processor.onaudioprocess = (e) => {
+        if (!ws || ws.readyState !== WebSocket.OPEN) return;
+        const input = e.inputBuffer.getChannelData(0);
+        const int16 = new Int16Array(input.length);
+        for (let i = 0; i < input.length; i++) {
+          int16[i] = Math.max(-32768, Math.min(32767, input[i] * 32768));
+        }
+        ws.send(int16.buffer);
+      };
+
+      source.connect(processor);
+      processor.connect(audioContext.destination);
+
+      // Send video frames every 1 second
+      const canvas = document.createElement('canvas');
+      canvas.width = 320; canvas.height = 240;
+      const ctx = canvas.getContext('2d');
+      const video = document.getElementById('video');
+
+      // Bug 6 FIX: store interval ID so stopSession() can clear it cleanly
+      videoInterval = setInterval(() => {
+        if (!sessionActive || ws?.readyState !== WebSocket.OPEN) return;
+        ctx.drawImage(video, 0, 0, 320, 240);
+        canvas.toBlob(blob => {
+          blob.arrayBuffer().then(buf => {
+            const prefix = new TextEncoder().encode('VID:');
+            const combined = new Uint8Array(prefix.length + buf.byteLength);
+            combined.set(prefix, 0);
+            combined.set(new Uint8Array(buf), prefix.length);
+            if (ws?.readyState === WebSocket.OPEN) ws.send(combined.buffer);
+          });
+        }, 'image/jpeg', 0.7);
+      }, 1000);
+    }
+
+    function speakWhisper(text) {
+      if (!window.speechSynthesis) return;
+      const utt = new SpeechSynthesisUtterance(text);
+      utt.rate = 1.1;
+      utt.pitch = 0.9;
+      utt.volume = 0.8;
+      window.speechSynthesis.speak(utt);
+    }
+
+    // Init camera on load
+    window.onload = startCamera;
+  </script>
 </body>
+
 </html>

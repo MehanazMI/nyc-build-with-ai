@@ -10,8 +10,8 @@
 | Phase | What | Status |
 |-------|------|--------|
 | Phase 0 | Repo scaffold + dependencies | ✅ Complete |
-| Phase 1 | Backend core (WebSocket + Gemini Live) | 🔜 Next |
-| Phase 2 | Two agent modes + JSON output | ⬜ |
+| Phase 1 | Backend core (WebSocket + Gemini Live) | ✅ Complete (14 bugs fixed) |
+| Phase 2 | Two agent modes + JSON output tuning | 🔜 Next |
 | Phase 3 | SSE dashboard + mobile capture UI | ⬜ |
 | Phase 4 | Audio whisper + Cloud Run deploy | ⬜ |
 
@@ -55,18 +55,24 @@ stagesense/
 
 ---
 
-## Phase 1 — Backend Core 🔜
+## Phase 1 — Backend Core ✅ Complete
 
 **Goal:** End-to-end audio pipeline working: mobile mic → WebSocket → Gemini Live → SSE → dashboard.
 
-**Key tasks:**
-- [ ] Test WebSocket receives audio bytes (curl or simple test client)
-- [ ] Verify Gemini Live session opens and produces text output
-- [ ] Verify `_parse_scores()` correctly extracts JSON from Gemini output
-- [ ] Dashboard receives `score_update` SSE events and renders
-- [ ] Fix any auth issues (`GOOGLE_GENAI_USE_VERTEXAI` + ADC)
-
-**Expected latency:** < 2s from speech → score update on dashboard
+**All fixes applied:**
+- [x] Bug 1 — New `stagesense/Dockerfile` (frontend COPY within build context)
+- [x] Bug 2 — StaticFiles mounted in `main.py` — serves `index.html` at `/`
+- [x] Bug 3 — `active_session` guard prevents concurrent session collisions
+- [x] Bug 4 — Switched to `gemini-2.0-flash-live-001` + `response_modalities=["TEXT"]`
+- [x] Bug 5 — Robust `_parse_scores()` with first-brace JSON extraction
+- [x] Bug 6 — `videoInterval` stored and cleared on session stop
+- [x] Bug 7 — `AudioContext` closed on session stop (no more memory leak)
+- [x] Bug 9 — SSE generator has `CancelledError` handler (L5 pattern)
+- [x] Bug 10 — `--proxy-headers` added to Dockerfile CMD (wss:// on Cloud Run)
+- [x] Bug 11 — StaticFiles mount confirmed last in `main.py`
+- [x] Bug 13 — `run_session()` uses `asyncio.gather` + score queue (no deadlock)
+- [x] Bug 14 — Initial stimulus sent to wake Gemini Live model immediately
+- [x] Gap — Startup env validation (fail-fast on missing `GOOGLE_CLOUD_PROJECT`)
 
 **Run command:**
 ```powershell
@@ -77,13 +83,15 @@ $env:GOOGLE_CLOUD_LOCATION = "us-central1"
 ```
 
 **Verification:**
-- `GET /health` returns `{"status": "ok", "mode": "coach"}`
-- Open `dashboard.html` → shows "Waiting for session"
+- `GET /health` returns `{"status": "ok", "mode": "coach", "session_active": false}`
+- Open `http://localhost:8080/` → shows mobile capture page ✅
+- Open `http://localhost:8080/dashboard.html` → shows "Waiting for session"
+- `curl -N http://localhost:8080/stream` → SSE events stream every 0.5s
 - Open `index.html` → grant camera/mic → Start Session → scores appear on dashboard
 
 ---
 
-## Phase 2 — Agent Modes
+## Phase 2 — Agent Modes 🔜 Next
 
 **Goal:** Both Coach and Room Read modes produce meaningful, consistent JSON scores.
 
@@ -124,19 +132,19 @@ $env:GOOGLE_CLOUD_LOCATION = "us-central1"
 **Goal:** Deployed on Cloud Run with HTTPS (required for mobile camera).
 
 **Key tasks:**
-- [ ] Add noise suppression to audio constraints (already in `index.html`)
 - [ ] Test on real phone over HTTPS
-- [ ] `gcloud run deploy stagesense --source backend/ --allow-unauthenticated --timeout 3600`
-- [ ] Verify SSE works through Cloud Run (set `--timeout 3600`)
+- [ ] Deploy from `stagesense/` root (not `backend/`) — Dockerfile now at root
+- [ ] Verify SSE works through Cloud Run
 - [ ] Demo rehearsal: 5 full run-throughs with real phone
 
-**Deploy:**
+**Deploy from `stagesense/` root:**
 ```bash
 gcloud run deploy stagesense \
-  --source backend/ \
+  --source . \
   --region us-central1 \
   --allow-unauthenticated \
   --timeout 3600 \
+  --memory 1Gi \
   --set-env-vars GOOGLE_CLOUD_PROJECT=ai-hack-489018,GOOGLE_GENAI_USE_VERTEXAI=true,GOOGLE_CLOUD_LOCATION=us-central1
 ```
 
