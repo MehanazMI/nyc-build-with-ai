@@ -21,14 +21,14 @@ from contextlib import asynccontextmanager
 from typing import Literal
 
 from dotenv import load_dotenv
+load_dotenv(override=True)  # MUST be before agent import — genai reads env at module load
+
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from sse_starlette.sse import EventSourceResponse
 
 from agent import StageSenseAgent
-
-load_dotenv()
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(levelname)s - %(name)s - %(message)s",
