@@ -14,7 +14,7 @@ Real-time coaching for speakers AND audience engagement analysis — no text box
 
 ## Team Members
 
-- Mehanaz MI
+- Abdul Rasheed with AI Agents
 
 ---
 
