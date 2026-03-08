@@ -476,6 +476,44 @@ Browser (screen share + mic) ──WebSocket──► Dispatch Agent (:8082)
 
 ---
 
-## 🔴 Level 5 — Coordinate Group Rescue (Planned)
+## ✅ Level 5 — Coordinate Group Rescue (Complete)
 
-*This section will be filled in as we build Level 5.*
+**Date:** 2026-03-08 | **Rank Achieved:** Rescued (100%)
+
+### Architecture
+
+```
+React Frontend (SSE) ←→ Satellite Dashboard (:8083) ←Kafka─► Formation Agent ←→ Gemini 2.5 Flash
+      pod_update events           ↕                    topic: a2a-formation-request
+      formation_update            Kafka Broker (:9092)
+                                  topic: a2a-reply-satellite-dashboard
+```
+
+### Key Implementation Note
+`a2a.server.apps.kafka` (referenced in the codelab solution) **does not exist in any public release** of `a2a-sdk`. Implemented a fully self-contained `KafkaServerApp` shim using `aiokafka` directly, matching the same `create_kafka_server()` / `.run()` API.
+
+### Steps
+
+1. **Infrastructure**: Installed Docker Desktop (v29.2.1) + WSL 2.6.3; started `mission-kafka` container (`apache/kafka:4.2.0-rc1`) on `:9092`
+2. **Formation Agent** (`level_5/agent/`): Gemini 2.5 Flash → 15 X,Y pod coordinates for CIRCLE/STAR/X/LINE/PARABOLA/RANDOM
+3. **Satellite Dashboard** (`level_5/satellite/main.py`): FastAPI SSE server with aiokafka producer/consumer; reply correlation via `asyncio.Future` dict
+4. **Frontend**: Built React app (`npm run build` → 1471 modules in `dist/`)
+5. **Dependencies**: `uv sync` with `sse-starlette`, `aiokafka`, `pydantic>=2.11.7` (116 packages)
+
+### Files Created / Modified
+| File | Change |
+|------|--------|
+| `agent/formation/agent.py` | NEW — Gemini formation agent |
+| `agent/formation/__init__.py` | NEW — package init |
+| `agent/agent_to_kafka_a2a.py` | REWRITE — KafkaServerApp shim on aiokafka |
+| `satellite/main.py` | REWRITE — direct aiokafka producer/consumer |
+| `pyproject.toml` | Add sse-starlette, pydantic; fix a2a version |
+| `frontend/dist/` | Built frontend assets |
+
+### Verification
+- ✅ Kafka container running on `:9092`
+- ✅ Formation agent consuming `a2a-formation-request` (group `a2a-agent-group`)
+- ✅ Satellite dashboard on `:8083` with reply consumer on `a2a-reply-satellite-dashboard`
+- ✅ SSE `/stream` sends 15 pod positions live
+- ✅ CIRCLE formation command tested end-to-end: request → Kafka → Gemini → coordinates → pods rearranged
+- ✅ Sandbox updated: `level_4_complete=true`, `completion_percentage=100`, portrait/icon uploaded

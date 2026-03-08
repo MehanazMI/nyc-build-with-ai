@@ -15,7 +15,7 @@
 | **L2** | Survivor Network | ✅ Complete | Cloud Spanner, Property Graph, RAG, Vertex AI |
 | **L3** | Process SOS signals | ✅ Complete | FastAPI, Gemini Live API, WebSocket, native audio |
 | **L4** | Dispatch Agent | ✅ Complete | A2A SDK, RemoteA2aAgent, Redis, hazard monitoring, Gemini Live |
-| **L5** | Coordinate Group Rescue | 🔴 Not started | Kafka, agent-to-agent comms, satellites |
+| **L5** | Coordinate Group Rescue | ✅ Complete | aiokafka, KafkaServerApp shim, Gemini 2.5 Flash, SSE, React |
 
 ### Rank Progression
 
@@ -140,33 +140,42 @@ Browser (camera + mic) ──WebSocket──► FastAPI (port 8080)
 
 ---
 
-## 🔴 Level 4 — Dispatch Agent
+## ✅ Level 4 — Dispatch Agent (Complete)
 
 **Goal:** Build an intelligent rescue dispatch agent that routes teams around hazard zones.
 
-**What to build:**
-- Dispatch agent with access to hazard database
-- Route planning that avoids dangerous areas
-- A2A communication to coordinate with other agents
+**Architecture:**
+```
+Browser (cam + mic) ──WebSocket──► Dispatch Agent (port 8082)
+                                       ├── monitor_for_hazard (video analysis)
+                                       ├── lookup_schematic_tool → Redis
+                                       └── RemoteA2aAgent → Architect Agent (port 8081)
+                                            └── lookup_schematic_tool → Redis (blueprints)
+```
 
-**Key Tech:** ADK dispatch agent, hazard DB (`hazard_db.py`), A2A protocol
-
-**Files:** `level_4/backend/dispatch_agent/`
+**Files:** `level_4/backend/dispatch_agent/`, `level_4/backend/architect_agent/`
 
 ---
 
-## 🔴 Level 5 — Coordinate Group Rescue
+## ✅ Level 5 — Coordinate Group Rescue (Complete)
 
-**Goal:** Full multi-agent orchestration — your agent communicates with a satellite agent via Kafka to coordinate the final group rescue.
+**Goal:** Full multi-agent orchestration — formation agent coordinates 15 rescue pods via Kafka.
 
-**What to build:**
-- Satellite agent (server) that manages rescue coordination
-- Kafka messaging bridge for agent-to-agent communication (`agent_to_kafka_a2a.py`)
-- Frontend dashboard showing rescue progress
+**Architecture:**
+```
+React Frontend (SSE) ←→ Satellite Dashboard (:8083) ←Kafka─► Formation Agent ←→ Gemini 2.5 Flash
+                              ↕                                      ↕
+                        Pod positions                         Coordinate math
+                        (15 pods, SSE)                       (circle/star/X/line)
+                              ↕
+                     Kafka Broker (:9092)
+               topics: a2a-formation-request
+                        a2a-reply-satellite-dashboard
+```
 
-**Key Tech:** Apache Kafka, A2A over Kafka, satellite agents, event streaming
+**Key implementation decision:** `a2a.server.apps.kafka` doesn't exist in any public PyPI release of `a2a-sdk`. Implemented a self-contained `KafkaServerApp` shim using `aiokafka` directly, matching the expected API.
 
-**Files:** `level_5/agent/`, `level_5/satellite/`
+**Files:** `level_5/agent/`, `level_5/satellite/`, `level_5/frontend/`
 
 ---
 
