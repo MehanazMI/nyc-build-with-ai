@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StageSense — Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&family=JetBrains+Mono:wght@400;700&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --accent: #7c3aed;
+            --accent2: #4f46e5;
+            --green: #22c55e;
+            --yellow: #eab308;
+            --red: #ef4444;
+            --bg: #080812;
+            --card: #0f0f1a;
+            --border: #1e1e2e;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: var(--bg);
+            color: #e2e8f0;
+            font-family: 'Inter', system-ui, sans-serif;
+            min-height: 100vh;
+            padding: 28px;
+            display: grid;
+            grid-template-rows: auto 1fr;
+            gap: 24px;
+        }
+
+        /* Header */
+        header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+        }
+
+        .logo-text {
+            font-size: 1.4rem;
+            font-weight: 900;
+            letter-spacing: 0.05em;
+        }
+
+        .logo-sub {
+            font-size: 0.7rem;
+            color: #666;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+        }
+
+        .mode-badge {
+            padding: 6px 16px;
+            border-radius: 100px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            transition: all 0.3s;
+        }
+
+        .mode-badge.coach {
+            background: #7c3aed22;
+            color: #a78bfa;
+            border: 1px solid #7c3aed44;
+        }
+
+        .mode-badge.roomread {
+            background: #0891b222;
+            color: #67e8f9;
+            border: 1px solid #0891b244;
+        }
+
+        .status-dot {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.8rem;
+            color: #666;
+        }
+
+        .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #333;
+            transition: all 0.3s;
+        }
+
+        .dot.live {
+            background: var(--green);
+            box-shadow: 0 0 8px var(--green);
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1
+            }
+
+            50% {
+                opacity: 0.5
+            }
+        }
+
+        /* Main Grid */
+        main {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: auto auto 1fr;
+            gap: 20px;
+        }
+
+        /* Score Cards */
+        .scores-section {
+            grid-column: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .section-label {
+            font-size: 0.7rem;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: #555;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .score-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 16px 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            transition: all 0.3s;
+        }
+
+        .score-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .score-name {
+            font-size: 0.8rem;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: #999;
+        }
+
+        .score-value {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.1rem;
+            font-weight: 700;
+            transition: all 0.3s;
+        }
+
+        .score-bar-bg {
+            background: #1a1a2e;
+            border-radius: 100px;
+            height: 6px;
+            overflow: hidden;
+        }
+
+        .score-bar {
+            height: 100%;
+            border-radius: 100px;
+            transition: width 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        /* Right Panel */
+        .right-panel {
+            grid-column: 2;
+            grid-row: 1 / -1;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* Insight Feed */
+        .insight-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 20px;
+            flex: 1;
+        }
+
+        .insight-label {
+            font-size: 0.7rem;
+            letter-spacing: 0.2em;
+            color: #555;
+            font-family: 'JetBrains Mono', monospace;
+            margin-bottom: 14px;
+            text-transform: uppercase;
+        }
+
+        .insight-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-height: 320px;
+            overflow-y: auto;
+        }
+
+        .insight-item {
+            padding: 12px 14px;
+            background: #12121f;
+            border-radius: 10px;
+            border-left: 3px solid var(--accent);
+            font-size: 0.85rem;
+            color: #c4b5fd;
+            line-height: 1.5;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: none;
+            }
+        }
+
+        /* Action Alert */
+        .action-card {
+            background: linear-gradient(135deg, #1a0030, #0f0f1a);
+            border: 1px solid #7c3aed66;
+            border-radius: 14px;
+            padding: 20px 22px;
+        }
+
+        .action-label {
+            font-size: 0.65rem;
+            letter-spacing: 0.2em;
+            color: #7c3aed;
+            font-family: 'JetBrains Mono', monospace;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        .action-text {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #e2e8f0;
+            line-height: 1.4;
+            transition: all 0.3s;
+        }
+
+        /* Filler count */
+        .filler-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .filler-count {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--yellow);
+        }
+
+        /* Waiting state */
+        .waiting {
+            color: #333;
+            font-size: 0.85rem;
+            font-family: 'JetBrains Mono', monospace;
+            text-align: center;
+            padding: 40px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <div class="logo">
+            <div class="logo-icon">⚡</div>
+            <div>
+                <div class="logo-text">STAGESENSE</div>
+                <div class="logo-sub">Live Presentation Intelligence</div>
+            </div>
+        </div>
+        <div class="mode-badge coach" id="modeBadge">COACH MODE</div>
+        <div class="status-dot">
+            <div class="dot" id="statusDot"></div>
+            <span id="statusText">Waiting for session...</span>
+        </div>
+    </header>
+
+    <main>
+
+        <!-- Score Bars (Coach Mode) -->
+        <div class="scores-section" id="coachScores">
+            <div class="section-label">&gt;_ Performance Metrics</div>
+
+            <div class="score-card">
+                <div class="score-header">
+                    <span class="score-name">⏱ Pace</span>
+                    <span class="score-value" id="paceVal">—</span>
+                </div>
+                <div class="score-bar-bg">
+                    <div class="score-bar" id="paceBar"
+                        style="width:0%;background:linear-gradient(90deg,#7c3aed,#a78bfa)"></div>
+                </div>
+            </div>
+
+            <div class="score-card">
+                <div class="score-header">
+                    <span class="score-name">🎯 Clarity</span>
+                    <span class="score-value" id="clarityVal">—</span>
+                </div>
+                <div class="score-bar-bg">
+                    <div class="score-bar" id="clarityBar"
+                        style="width:0%;background:linear-gradient(90deg,#4f46e5,#818cf8)"></div>
+                </div>
+            </div>
+
+            <div class="score-card">
+                <div class="score-header">
+                    <span class="score-name">⚡ Energy</span>
+                    <span class="score-value" id="energyVal">—</span>
+                </div>
+                <div class="score-bar-bg">
+                    <div class="score-bar" id="energyBar"
+                        style="width:0%;background:linear-gradient(90deg,#22c55e,#86efac)"></div>
+                </div>
+            </div>
+
+            <div class="filler-card">
+                <div>
+                    <div class="score-name">💬 Filler Words</div>
+                    <div style="font-size:0.7rem;color:#555;margin-top:4px">last 30 seconds</div>
+                </div>
+                <div class="filler-count" id="fillerCount">0</div>
+            </div>
+        </div>
+
+        <!-- Score Bars (Room Read Mode) — hidden initially -->
+        <div class="scores-section" id="roomScores" style="display:none">
+            <div class="section-label">&gt;_ Audience Analysis</div>
+
+            <div class="score-card">
+                <div class="score-header">
+                    <span class="score-name">👀 Engagement</span>
+                    <span class="score-value" id="engVal">—</span>
+                </div>
+                <div class="score-bar-bg">
+                    <div class="score-bar" id="engBar"
+                        style="width:0%;background:linear-gradient(90deg,#0891b2,#67e8f9)"></div>
+                </div>
+            </div>
+
+            <div class="score-card">
+                <div class="score-header">
+                    <span class="score-name">🤔 Confusion</span>
+                    <span class="score-value" id="confVal">—</span>
+                </div>
+                <div class="score-bar-bg">
+                    <div class="score-bar" id="confBar"
+                        style="width:0%;background:linear-gradient(90deg,#ef4444,#fca5a5)"></div>
+                </div>
+            </div>
+
+            <div class="score-card">
+                <div class="score-header">
+                    <span class="score-name">🔥 Excitement</span>
+                    <span class="score-value" id="excVal">—</span>
+                </div>
+                <div class="score-bar-bg">
+                    <div class="score-bar" id="excBar"
+                        style="width:0%;background:linear-gradient(90deg,#eab308,#fde047)"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Panel -->
+        <div class="right-panel">
+            <div class="action-card">
+                <div class="action-label">⚡ Live Coach Signal</div>
+                <div class="action-text" id="actionText">Waiting for session to start...</div>
+            </div>
+
+            <div class="insight-card">
+                <div class="insight-label">&gt;_ Insight Feed</div>
+                <div class="insight-list" id="insightList">
+                    <div class="waiting">_ awaiting session start</div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        const BACKEND = location.protocol === 'file:'
+            ? 'http://localhost:8080'
+            : location.origin;
+
+        let isLive = false;
+
+        function connectSSE() {
+            const evtSource = new EventSource(`${BACKEND}/stream`);
+
+            evtSource.addEventListener('score_update', (e) => {
+                const data = JSON.parse(e.data);
+                updateDashboard(data);
+            });
+
+            evtSource.onerror = () => {
+                setTimeout(connectSSE, 3000); // auto-reconnect
+            };
+        }
+
+        function updateDashboard(data) {
+            const mode = data.mode || 'coach';
+
+            // Update mode badge
+            const badge = document.getElementById('modeBadge');
+            badge.textContent = mode === 'coach' ? 'COACH MODE' : 'ROOM READ MODE';
+            badge.className = `mode-badge ${mode}`;
+
+            // Toggle score sections
+            document.getElementById('coachScores').style.display = mode === 'coach' ? 'flex' : 'none';
+            document.getElementById('roomScores').style.display = mode === 'roomread' ? 'flex' : 'none';
+
+            // Live indicator
+            if (!isLive) {
+                isLive = true;
+                document.getElementById('statusDot').classList.add('live');
+                document.getElementById('statusText').textContent = 'Live';
+            }
+
+            const bar = (id, val, low = '#ef4444', mid = '#eab308', high = '#22c55e') => {
+                const el = document.getElementById(id + 'Bar');
+                const valEl = document.getElementById(id + 'Val');
+                if (!el || val == null) return;
+                el.style.width = val + '%';
+                valEl.textContent = val + '%';
+                valEl.style.color = val < 40 ? low : val < 70 ? mid : high;
+            };
+
+            if (mode === 'coach') {
+                bar('pace', data.pace);
+                bar('clarity', data.clarity);
+                bar('energy', data.energy);
+                document.getElementById('fillerCount').textContent = data.filler_count ?? 0;
+
+                if (data.action) {
+                    document.getElementById('actionText').textContent = data.action;
+                }
+                if (data.insight) addInsight(data.insight);
+            } else {
+                bar('eng', data.engagement);
+                bar('conf', data.confusion, '#22c55e', '#eab308', '#ef4444'); // reversed: high confusion is bad
+                bar('exc', data.excitement);
+
+                if (data.alert) {
+                    document.getElementById('actionText').textContent = data.alert;
+                    addInsight(data.alert);
+                }
+            }
+        }
+
+        function addInsight(text) {
+            const list = document.getElementById('insightList');
+            // Remove waiting placeholder
+            const waiting = list.querySelector('.waiting');
+            if (waiting) waiting.remove();
+
+            const item = document.createElement('div');
+            item.className = 'insight-item';
+            item.textContent = text;
+            list.prepend(item);
+
+            // Keep max 10 insights
+            const items = list.querySelectorAll('.insight-item');
+            if (items.length > 10) items[items.length - 1].remove();
+        }
+
+        connectSSE();
+    </script>
+</body>
+
+</html>
