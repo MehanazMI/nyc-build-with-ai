@@ -110,23 +110,23 @@ def simulate_scores(mode: str) -> dict:
 async def lifespan(app: FastAPI):
     global agent_instance
 
-    # Gap FIX: Fail-fast env validation at startup — surfaces auth errors before
-    # a user tries to start a session and gets a cryptic mid-session crash.
+    use_vertex = os.getenv("GOOGLE_GENAI_USE_VERTEXAI", "false").lower() == "true"
     project = os.getenv("GOOGLE_CLOUD_PROJECT")
     location = os.getenv("GOOGLE_CLOUD_LOCATION", "us-central1")
-    use_vertex = os.getenv("GOOGLE_GENAI_USE_VERTEXAI", "false").lower()
+    api_key = os.getenv("GOOGLE_API_KEY")
 
-    if not project:
-        logger.warning(
-            "⚠️  GOOGLE_CLOUD_PROJECT not set — Gemini Live sessions will fail. "
-            "Set it via .env or environment variables."
-        )
-    if use_vertex != "true":
-        logger.warning(
-            "⚠️  GOOGLE_GENAI_USE_VERTEXAI is not 'true' — auth may fail on Cloud Run."
-        )
+    if use_vertex:
+        if not project:
+            logger.warning("⚠️  Vertex mode but GOOGLE_CLOUD_PROJECT not set — sessions will fail.")
+        else:
+            logger.info(f"✅ Vertex AI mode — project={project}, location={location}")
+    else:
+        if not api_key:
+            logger.warning("⚠️  GOOGLE_API_KEY not set — Gemini Live sessions will fail.")
+        else:
+            logger.info(f"✅ Google AI API key mode — Live API ready")
 
-    logger.info(f"StageSense starting — project={project}, location={location}")
+    logger.info(f"StageSense starting — model={os.getenv('MODEL_ID', 'default')}")
     agent_instance = StageSenseAgent()
     logger.info("StageSenseAgent initialized ✅")
     yield

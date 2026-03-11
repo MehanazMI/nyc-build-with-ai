@@ -110,15 +110,25 @@ class StageSenseAgent:
         live_request_queue = LiveRequestQueue()
         score_queue: asyncio.Queue[dict] = asyncio.Queue()
 
+        use_vertex = os.getenv("GOOGLE_GENAI_USE_VERTEXAI", "false").lower() == "true"
         run_config = RunConfig(
             streaming_mode=StreamingMode.BIDI,
             response_modalities=["AUDIO"],
             input_audio_transcription=types.AudioTranscriptionConfig(),
             output_audio_transcription=types.AudioTranscriptionConfig(),
-            session_resumption=types.SessionResumptionConfig(),
+            # session_resumption is Vertex-only — only add when using Vertex
+            session_resumption=types.SessionResumptionConfig() if use_vertex else None,
+            proactivity=types.ProactivityConfig(proactive_audio=True),
         )
 
         logger.info(f"Opening Gemini Live — mode={mode}, model={MODEL_ID}")
+
+        # L3 pattern: send Hello stimulus into queue BEFORE gather starts
+        # This wakes the native audio model and forces an initial turn
+        logger.info("Sending Hello stimulus to wake model...")
+        live_request_queue.send_content(
+            types.Content(parts=[types.Part(text="Hello")])
+        )
 
         async def upstream():
             """Reads WebSocket frames → LiveRequestQueue."""
@@ -149,6 +159,17 @@ class StageSenseAgent:
                 live_request_queue=live_request_queue,
                 run_config=run_config,
             ):
+                # Path 1: ADK Event content (primary — used with Google AI API key)
+                content = getattr(event, "content", None)
+                if content and getattr(content, "parts", None):
+                    for part in content.parts:
+                        if getattr(part, "text", None):
+                            logger.info(f"Content text: {part.text[:80]!r}")
+                            scores = _parse_scores(part.text, mode)
+                            if scores:
+                                await score_queue.put(scores)
+
+                # Path 2: output_audio_transcription (Vertex native audio)
                 output_tx = getattr(event, "output_audio_transcription", None)
                 if output_tx and getattr(output_tx, "final_transcript", None):
                     tx = output_tx.final_transcript
@@ -157,11 +178,12 @@ class StageSenseAgent:
                     if scores:
                         await score_queue.put(scores)
 
+                # Path 3: server_content fallback (Vertex)
                 sc = getattr(event, "server_content", None)
                 if sc and getattr(sc, "model_turn", None):
                     for part in sc.model_turn.parts:
                         if getattr(part, "text", None):
-                            logger.info(f"Text: {part.text[:80]!r}")
+                            logger.info(f"Server text: {part.text[:80]!r}")
                             scores = _parse_scores(part.text, mode)
                             if scores:
                                 await score_queue.put(scores)
