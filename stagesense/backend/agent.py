@@ -35,43 +35,29 @@ logger = logging.getLogger("stagesense.agent")
 APP_NAME = "stagesense"
 MODEL_ID = os.getenv("MODEL_ID", "gemini-live-2.5-flash-preview-native-audio-09-2025")
 
-COACH_INSTRUCTION = """
-You are StageSense Coach — a real-time live presentation coach.
-You receive continuous audio and video of a presenter speaking on stage.
+COACH_INSTRUCTION = (
+    "You are a JSON-only presentation scorecard API. "
+    "RULES: Output ONLY raw JSON. Never output prose, markdown, explanations, or any other text. "
+    "FORBIDDEN: do not use ** or *, do not write sentences, do not say 'I', do not say 'StageSense'. "
+    "Every response must be exactly this JSON object and nothing else: "
+    '{"pace": <0-100>, "clarity": <0-100>, "energy": <0-100>, "filler_count": <integer>, "insight": "<10 words>", "action": "<10 words>"} '
+    "Scoring: pace=speaking speed (100=ideal), clarity=articulation (100=crisp), energy=confidence (100=high), filler_count=um/uh/like count. "
+    "Output your first scorecard NOW: "
+    '{"pace": 50, "clarity": 50, "energy": 50, "filler_count": 0, "insight": "Session started", "action": "Begin speaking"}'
+)
 
-YOUR ONLY JOB: Every 5 seconds, output a JSON scorecard and nothing else.
 
-OUTPUT FORMAT — speak exactly this JSON, nothing before or after:
-{"pace": <0-100>, "clarity": <0-100>, "energy": <0-100>, "filler_count": <integer>, "insight": "<12 words max>", "action": "<12 words max>"}
+ROOM_READ_INSTRUCTION = (
+    "You are a JSON-only audience scorecard API. "
+    "RULES: Output ONLY raw JSON. Never output prose, markdown, explanations, or any other text. "
+    "FORBIDDEN: do not use ** or *, do not write sentences, do not say 'I'. "
+    "Every response must be exactly this JSON object and nothing else: "
+    '{"engagement": <0-100>, "confusion": <0-100>, "excitement": <0-100>, "alert": "<10 words>"} '
+    "Scoring: engagement=attention level, confusion=lost faces (100=bad), excitement=energy in room. "
+    "Output your first scorecard NOW: "
+    '{"engagement": 60, "confusion": 10, "excitement": 50, "alert": "Scanning audience now"}'
+)
 
-SCORING:
-- pace: 0=too fast or silent, 50=too slow, 100=ideal conversational pace
-- clarity: 100=crisp articulation and clear vocabulary
-- energy: 100=confident, projected, engaged voice
-- filler_count: "um", "uh", "like", "you know" in last 30 seconds
-- insight: one specific thing you observe about delivery
-- action: one immediate coaching tip (e.g. "Slow down", "Pause longer", "Project louder")
-
-Start immediately: {"pace": 50, "clarity": 50, "energy": 50, "filler_count": 0, "insight": "Session started, warming up", "action": "Begin speaking now"}
-"""
-
-ROOM_READ_INSTRUCTION = """
-You are StageSense AudienceRead — real-time audience intelligence.
-You receive live video of an audience during a presentation.
-
-YOUR ONLY JOB: Every 3 seconds, output a JSON audience report and nothing else.
-
-OUTPUT FORMAT — speak exactly this JSON, nothing before or after:
-{"engagement": <0-100>, "confusion": <0-100>, "excitement": <0-100>, "alert": "<15 words max>"}
-
-SCORING:
-- engagement: 100=fully attentive and focused on the speaker
-- confusion: 100=many lost, blank, or frustrated faces (HIGH = BAD)
-- excitement: 100=leaning forward, nodding, smiling
-- alert: one specific observation for the speaker
-
-Start immediately: {"engagement": 50, "confusion": 0, "excitement": 50, "alert": "Session started, scanning audience now"}
-"""
 
 # ADK Agents — global singletons (L3 pattern)
 _coach_agent = Agent(name="stagesense_coach", model=MODEL_ID, instruction=COACH_INSTRUCTION)
