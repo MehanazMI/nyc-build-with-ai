@@ -4,185 +4,377 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-  <title>StageSense — Mobile Capture</title>
+  <title>StageSense — Live Presentation Intelligence</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
+    :root {
+      --accent: #7c3aed;
+      --accent2: #4f46e5;
+      --green: #22c55e;
+      --yellow: #eab308;
+      --red: #ef4444;
+      --bg: #080812;
+      --card: #0f0f1a;
+      --border: #1e1e2e;
     }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
 
     body {
-      background: #0a0a0f;
-      color: #fff;
+      background: var(--bg);
+      color: #e2e8f0;
       font-family: 'Inter', system-ui, sans-serif;
-      height: 100dvh;
+      min-height: 100dvh;
+      display: grid;
+      grid-template-rows: auto 1fr;
+      gap: 0;
+      overflow: hidden;
+    }
+
+    /* ── Header ── */
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 28px;
+      border-bottom: 1px solid var(--border);
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .logo { display: flex; align-items: center; gap: 10px; }
+    .logo-icon {
+      width: 38px; height: 38px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.2rem;
+    }
+    .logo-text { font-size: 1.3rem; font-weight: 900; letter-spacing: 0.05em; }
+    .logo-sub { font-size: 0.65rem; color: #555; letter-spacing: 0.2em; text-transform: uppercase; }
+
+    .header-right { display: flex; align-items: center; gap: 16px; }
+
+    .mode-badge {
+      padding: 5px 14px; border-radius: 100px;
+      font-size: 0.72rem; font-weight: 700;
+      letter-spacing: 0.15em; text-transform: uppercase; transition: all 0.3s;
+    }
+    .mode-badge.coach { background: #7c3aed22; color: #a78bfa; border: 1px solid #7c3aed44; }
+    .mode-badge.roomread { background: #0891b222; color: #67e8f9; border: 1px solid #0891b244; }
+
+    .status-dot { display: flex; align-items: center; gap: 7px; font-size: 0.78rem; color: #555; }
+    .dot { width: 8px; height: 8px; border-radius: 50%; background: #333; transition: all 0.3s; }
+    .dot.live { background: var(--green); box-shadow: 0 0 8px var(--green); animation: pulse 1.5s infinite; }
+
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.45} }
+    @keyframes slideIn { from{opacity:0} to{opacity:1} }
+
+    /* ── Main Layout ── */
+    main {
+      display: grid;
+      grid-template-columns: 380px 1fr;
+      height: calc(100dvh - 72px);
+      overflow: hidden;
+    }
+
+    /* ── Left Panel: Camera + Controls ── */
+    .left-panel {
       display: flex;
       flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 16px;
+      gap: 14px;
       padding: 20px;
+      border-right: 1px solid var(--border);
+      overflow-y: auto;
     }
 
-    h1 {
-      font-size: 1.4rem;
-      letter-spacing: 0.1em;
-      color: #7c3aed;
+    .mode-btns { display: flex; gap: 10px; }
+    .mode-btn {
+      flex: 1; padding: 10px 12px;
+      border: 2px solid #333; border-radius: 10px;
+      background: transparent; color: #777;
+      font-size: 0.82rem; font-weight: 600;
+      cursor: pointer; transition: all 0.2s;
+      letter-spacing: 0.05em; font-family: inherit;
     }
-
-    .subtitle {
-      font-size: 0.8rem;
-      color: #666;
-      text-align: center;
-    }
+    .mode-btn.active { border-color: var(--accent); background: #7c3aed1a; color: #a78bfa; }
+    .mode-btn:hover:not(.active) { border-color: #555; color: #aaa; }
 
     video {
-      width: 100%;
-      max-width: 380px;
-      border-radius: 16px;
-      border: 2px solid #1e1e2e;
+      width: 100%; border-radius: 14px;
+      border: 2px solid var(--border);
       background: #111;
       transform: scaleX(-1);
-    }
-
-    .mode-btns {
-      display: flex;
-      gap: 10px;
-      width: 100%;
-      max-width: 380px;
-    }
-
-    .mode-btn {
-      flex: 1;
-      padding: 12px;
-      border: 2px solid #333;
-      border-radius: 10px;
-      background: transparent;
-      color: #999;
-      font-size: 0.85rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s;
-      letter-spacing: 0.05em;
-    }
-
-    .mode-btn.active {
-      border-color: #7c3aed;
-      background: #7c3aed22;
-      color: #a78bfa;
+      aspect-ratio: 4/3;
+      object-fit: cover;
     }
 
     .start-btn {
-      width: 100%;
-      max-width: 380px;
-      padding: 16px;
-      border-radius: 12px;
-      border: none;
-      background: linear-gradient(135deg, #7c3aed, #4f46e5);
-      color: #fff;
-      font-size: 1rem;
-      font-weight: 700;
-      cursor: pointer;
-      letter-spacing: 0.08em;
-      transition: all 0.2s;
+      width: 100%; padding: 15px;
+      border-radius: 12px; border: none;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color: #fff; font-size: 0.95rem; font-weight: 700;
+      cursor: pointer; letter-spacing: 0.08em;
+      transition: all 0.2s; font-family: inherit;
     }
+    .start-btn:hover { opacity: 0.9; transform: translateY(-1px); }
+    .start-btn.active { background: linear-gradient(135deg, #dc2626, #991b1b); }
+    .start-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
 
-    .start-btn:disabled {
-      opacity: 0.4;
-      cursor: not-allowed;
+    .status-label {
+      font-size: 0.78rem; color: #555; text-align: center;
+      font-family: 'JetBrains Mono', monospace;
     }
-
-    .status {
-      font-size: 0.8rem;
-      color: #666;
-      text-align: center;
-    }
-
-    .status.live {
-      color: #22c55e;
-      animation: pulse 1.5s infinite;
-    }
-
-    @keyframes pulse {
-
-      0%,
-      100% {
-        opacity: 1
-      }
-
-      50% {
-        opacity: 0.5
-      }
-    }
+    .status-label.live { color: var(--green); animation: pulse 1.5s infinite; }
 
     .whisper-box {
-      width: 100%;
-      max-width: 380px;
-      padding: 14px 16px;
-      background: #1e1e2e;
+      padding: 13px 16px;
+      background: #12121f;
       border-radius: 12px;
-      border-left: 3px solid #7c3aed;
-      font-size: 0.9rem;
-      color: #c4b5fd;
-      min-height: 52px;
-      display: flex;
-      align-items: center;
+      border-left: 3px solid var(--accent);
+      font-size: 0.85rem; color: #c4b5fd;
+      min-height: 50px; display: flex; align-items: center;
+      line-height: 1.5;
+    }
+
+    /* ── Right Panel: Dashboard ── */
+    .right-panel {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: 1fr auto;
+      gap: 18px;
+      padding: 20px;
+      overflow-y: auto;
+    }
+
+    .scores-section {
+      display: flex; flex-direction: column; gap: 12px;
+    }
+
+    .section-label {
+      font-size: 0.68rem; letter-spacing: 0.2em;
+      text-transform: uppercase; color: #444;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .score-card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 13px; padding: 14px 18px;
+      display: flex; flex-direction: column; gap: 9px;
+      transition: border-color 0.3s;
+    }
+    .score-card:hover { border-color: #2e2e4e; }
+
+    .score-header { display: flex; justify-content: space-between; align-items: center; }
+    .score-name { font-size: 0.78rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: #888; }
+    .score-value { font-family: 'JetBrains Mono', monospace; font-size: 1rem; font-weight: 700; transition: all 0.3s; }
+
+    .score-bar-bg { background: #1a1a2e; border-radius: 100px; height: 5px; overflow: hidden; }
+    .score-bar { height: 100%; border-radius: 100px; transition: width 0.8s cubic-bezier(0.34,1.56,0.64,1); }
+
+    .filler-card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 13px; padding: 14px 18px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .filler-count { font-family: 'JetBrains Mono', monospace; font-size: 2rem; font-weight: 700; color: var(--yellow); }
+
+    /* Right-right column: signal + feed */
+    .signal-column {
+      display: flex; flex-direction: column; gap: 14px;
+    }
+
+    .action-card {
+      background: linear-gradient(135deg, #1a0030, #0f0f1a);
+      border: 1px solid #7c3aed55; border-radius: 13px;
+      padding: 18px 20px;
+    }
+    .action-label { font-size: 0.65rem; letter-spacing: 0.2em; color: var(--accent); font-family: 'JetBrains Mono', monospace; text-transform: uppercase; margin-bottom: 8px; }
+    .action-text { font-size: 1.05rem; font-weight: 700; color: #e2e8f0; line-height: 1.4; transition: all 0.3s; }
+
+    .insight-card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 13px; padding: 18px; flex: 1; overflow: hidden;
+    }
+    .insight-label { font-size: 0.68rem; letter-spacing: 0.2em; color: #444; font-family: 'JetBrains Mono', monospace; text-transform: uppercase; margin-bottom: 12px; }
+    .insight-list { display: flex; flex-direction: column; gap: 9px; max-height: 300px; overflow-y: auto; }
+    .insight-item {
+      padding: 10px 13px; background: #12121f; border-radius: 9px;
+      border-left: 3px solid var(--accent); font-size: 0.82rem;
+      color: #c4b5fd; line-height: 1.5; animation: slideIn 0.3s ease-out;
+    }
+    .waiting { color: #2a2a3e; font-size: 0.82rem; font-family: 'JetBrains Mono', monospace; text-align: center; padding: 30px; }
+
+    /* Responsive: stack on narrow screens */
+    @media (max-width: 800px) {
+      main { grid-template-columns: 1fr; grid-template-rows: auto 1fr; height: auto; }
+      .left-panel { border-right: none; border-bottom: 1px solid var(--border); }
+      .right-panel { grid-template-columns: 1fr; }
+      body { overflow: auto; }
     }
   </style>
 </head>
 
 <body>
 
-  <h1>⚡ STAGESENSE</h1>
+  <header>
+    <div class="logo">
+      <div class="logo-icon">⚡</div>
+      <div>
+        <div class="logo-text">STAGESENSE</div>
+        <div class="logo-sub">Live Presentation Intelligence</div>
+      </div>
+    </div>
+    <div class="header-right">
+      <div class="mode-badge coach" id="modeBadge">COACH MODE</div>
+      <div class="status-dot">
+        <div class="dot" id="statusDot"></div>
+        <span id="statusText">Ready</span>
+      </div>
+    </div>
+  </header>
 
-  <div class="mode-btns">
-    <button class="mode-btn active" id="btn-coach" onclick="setMode('coach')">🎤 COACH</button>
-    <button class="mode-btn" id="btn-roomread" onclick="setMode('roomread')">👁 ROOM READ</button>
-  </div>
+  <main>
 
-  <video id="video" autoplay muted playsinline></video>
+    <!-- LEFT: Camera + Controls -->
+    <div class="left-panel">
+      <div class="mode-btns">
+        <button class="mode-btn active" id="btn-coach" onclick="setMode('coach')">🎤 COACH</button>
+        <button class="mode-btn" id="btn-roomread" onclick="setMode('roomread')">👁 ROOM READ</button>
+      </div>
 
-  <button class="start-btn" id="startBtn" onclick="toggleSession()">START SESSION</button>
+      <video id="video" autoplay muted playsinline></video>
 
-  <div class="whisper-box" id="whisper">AI coaching will appear here...</div>
+      <button class="start-btn" id="startBtn" onclick="toggleSession()">START SESSION</button>
 
-  <p class="status" id="status">Camera ready — choose mode and start</p>
+      <div class="status-label" id="statusLabel">Camera ready — choose mode and start</div>
+
+      <div class="whisper-box" id="whisper">AI coaching will appear here...</div>
+    </div>
+
+    <!-- RIGHT: Live Dashboard -->
+    <div class="right-panel">
+
+      <!-- Coach scores -->
+      <div class="scores-section" id="coachScores">
+        <div class="section-label">&gt;_ Performance Metrics</div>
+
+        <div class="score-card">
+          <div class="score-header">
+            <span class="score-name">⏱ Pace</span>
+            <span class="score-value" id="paceVal">—</span>
+          </div>
+          <div class="score-bar-bg">
+            <div class="score-bar" id="paceBar" style="width:0%;background:linear-gradient(90deg,#7c3aed,#a78bfa)"></div>
+          </div>
+        </div>
+
+        <div class="score-card">
+          <div class="score-header">
+            <span class="score-name">🎯 Clarity</span>
+            <span class="score-value" id="clarityVal">—</span>
+          </div>
+          <div class="score-bar-bg">
+            <div class="score-bar" id="clarityBar" style="width:0%;background:linear-gradient(90deg,#4f46e5,#818cf8)"></div>
+          </div>
+        </div>
+
+        <div class="score-card">
+          <div class="score-header">
+            <span class="score-name">⚡ Energy</span>
+            <span class="score-value" id="energyVal">—</span>
+          </div>
+          <div class="score-bar-bg">
+            <div class="score-bar" id="energyBar" style="width:0%;background:linear-gradient(90deg,#22c55e,#86efac)"></div>
+          </div>
+        </div>
+
+        <div class="filler-card">
+          <div>
+            <div class="score-name">💬 Filler Words</div>
+            <div style="font-size:0.68rem;color:#444;margin-top:3px">last 30 seconds</div>
+          </div>
+          <div class="filler-count" id="fillerCount">0</div>
+        </div>
+      </div>
+
+      <!-- Room Read scores -->
+      <div class="scores-section" id="roomScores" style="display:none">
+        <div class="section-label">&gt;_ Audience Analysis</div>
+
+        <div class="score-card">
+          <div class="score-header">
+            <span class="score-name">👀 Engagement</span>
+            <span class="score-value" id="engVal">—</span>
+          </div>
+          <div class="score-bar-bg">
+            <div class="score-bar" id="engBar" style="width:0%;background:linear-gradient(90deg,#0891b2,#67e8f9)"></div>
+          </div>
+        </div>
+
+        <div class="score-card">
+          <div class="score-header">
+            <span class="score-name">🤔 Confusion</span>
+            <span class="score-value" id="confVal">—</span>
+          </div>
+          <div class="score-bar-bg">
+            <div class="score-bar" id="confBar" style="width:0%;background:linear-gradient(90deg,#ef4444,#fca5a5)"></div>
+          </div>
+        </div>
+
+        <div class="score-card">
+          <div class="score-header">
+            <span class="score-name">🔥 Excitement</span>
+            <span class="score-value" id="excVal">—</span>
+          </div>
+          <div class="score-bar-bg">
+            <div class="score-bar" id="excBar" style="width:0%;background:linear-gradient(90deg,#eab308,#fde047)"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Signal + Insight Feed -->
+      <div class="signal-column" style="grid-column: 2; grid-row: 1">
+        <div class="action-card">
+          <div class="action-label">⚡ Live Coach Signal</div>
+          <div class="action-text" id="actionText">Waiting for session to start...</div>
+        </div>
+
+        <div class="insight-card">
+          <div class="insight-label">&gt;_ Insight Feed</div>
+          <div class="insight-list" id="insightList">
+            <div class="waiting">_ awaiting session start</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
 
   <script>
-    const BACKEND = location.protocol === 'file:'
+    const WS_BASE = location.protocol === 'file:'
       ? 'ws://localhost:8080'
       : `${location.protocol === 'https:' ? 'wss' : 'ws'}://${location.host}`;
+    const HTTP_BASE = location.protocol === 'file:'
+      ? 'http://localhost:8080'
+      : location.origin;
 
-    let ws = null;
-    let mediaStream = null;
-    let currentMode = 'coach';
-    let sessionActive = false;
-    let audioContext = null;
-    let processor = null;
-    let videoInterval = null; // Bug 6 FIX: store ID so we can clearInterval on stop
+    let ws = null, mediaStream = null, currentMode = 'coach';
+    let sessionActive = false, audioContext = null, processor = null, videoInterval = null;
+    let isLive = false;
 
+    // ── Mode toggle ──
     async function setMode(mode) {
       currentMode = mode;
       document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
       document.getElementById(`btn-${mode}`).classList.add('active');
-
-      // Flip camera for room read mode
-      const video = document.getElementById('video');
-      video.style.transform = mode === 'coach' ? 'scaleX(-1)' : 'scaleX(1)';
-
-      // Tell backend
-      if (sessionActive) {
-        await fetch(`/mode/${mode}`, { method: 'POST' });
-      }
-
-      // Switch camera facing
-      if (mediaStream) {
-        mediaStream.getTracks().forEach(t => t.stop());
-        await startCamera();
-      }
+      document.getElementById('video').style.transform = mode === 'coach' ? 'scaleX(-1)' : 'scaleX(1)';
+      if (sessionActive) await fetch(`/mode/${mode}`, { method: 'POST' });
+      if (mediaStream) { mediaStream.getTracks().forEach(t => t.stop()); await startCamera(); }
     }
 
+    // ── Camera ──
     async function startCamera() {
       const facingMode = currentMode === 'coach' ? 'user' : 'environment';
       try {
@@ -190,93 +382,80 @@
           video: { facingMode, width: { ideal: 640 }, height: { ideal: 480 } },
           audio: { noiseSuppression: true, echoCancellation: true, sampleRate: 16000 }
         });
-        document.getElementById('video').srcObject = mediaStream;
-      } catch (e) {
-        // Fallback: try without facing mode constraint
+      } catch {
         mediaStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-        document.getElementById('video').srcObject = mediaStream;
       }
+      document.getElementById('video').srcObject = mediaStream;
     }
 
+    // ── Session ──
     async function toggleSession() {
-      if (sessionActive) stopSession();
-      else await startSession();
+      if (sessionActive) stopSession(); else await startSession();
     }
 
     async function startSession() {
       await startCamera();
-
-      // Set mode on backend
       await fetch(`/mode/${currentMode}`, { method: 'POST' });
-
-      // Open WebSocket
-      ws = new WebSocket(`${BACKEND}/ws`);
+      ws = new WebSocket(`${WS_BASE}/ws`);
       ws.binaryType = 'arraybuffer';
-
       ws.onopen = () => {
         sessionActive = true;
         document.getElementById('startBtn').textContent = 'STOP SESSION';
-        document.getElementById('status').textContent = '🟢 Live — coaching active';
-        document.getElementById('status').className = 'status live';
+        document.getElementById('startBtn').classList.add('active');
+        setStatusLabel('🟢 Live — coaching active', true);
         startStreaming();
       };
-
       ws.onmessage = (ev) => {
         try {
           const msg = JSON.parse(ev.data);
           if (msg.type === 'whisper' && msg.text) {
             document.getElementById('whisper').textContent = '💬 ' + msg.text;
-            speakWhisper(msg.text);
           }
-        } catch { }
+        } catch {}
       };
-
       ws.onclose = () => stopSession();
     }
 
     function stopSession() {
       sessionActive = false;
-      // Bug 6 FIX: clear video frame interval — prevents stacked intervals on restart
-      clearInterval(videoInterval);
-      videoInterval = null;
-      // Bug 7 FIX: close AudioContext — prevents memory leak across sessions
-      processor?.disconnect();
-      audioContext?.close();
-      audioContext = null;
-      processor = null;
+      clearInterval(videoInterval); videoInterval = null;
+      processor?.disconnect(); audioContext?.close();
+      audioContext = null; processor = null;
       ws?.close();
       mediaStream?.getTracks().forEach(t => t.stop());
       document.getElementById('startBtn').textContent = 'START SESSION';
-      document.getElementById('status').textContent = 'Session ended';
-      document.getElementById('status').className = 'status';
+      document.getElementById('startBtn').classList.remove('active');
+      setStatusLabel('Session ended', false);
+      document.getElementById('statusDot').classList.remove('live');
+      document.getElementById('statusText').textContent = 'Ready';
+      isLive = false;
     }
 
+    function setStatusLabel(text, live) {
+      const el = document.getElementById('statusLabel');
+      el.textContent = text;
+      el.className = live ? 'status-label live' : 'status-label';
+    }
+
+    // ── Audio + Video streaming ──
     function startStreaming() {
-      if (!mediaStream) return;
       audioContext = new AudioContext({ sampleRate: 16000 });
       const source = audioContext.createMediaStreamSource(mediaStream);
       processor = audioContext.createScriptProcessor(4096, 1, 1);
-
       processor.onaudioprocess = (e) => {
         if (!ws || ws.readyState !== WebSocket.OPEN) return;
         const input = e.inputBuffer.getChannelData(0);
         const int16 = new Int16Array(input.length);
-        for (let i = 0; i < input.length; i++) {
-          int16[i] = Math.max(-32768, Math.min(32767, input[i] * 32768));
-        }
+        for (let i = 0; i < input.length; i++) int16[i] = Math.max(-32768, Math.min(32767, input[i] * 32768));
         ws.send(int16.buffer);
       };
-
       source.connect(processor);
       processor.connect(audioContext.destination);
 
-      // Send video frames every 1 second
       const canvas = document.createElement('canvas');
       canvas.width = 320; canvas.height = 240;
       const ctx = canvas.getContext('2d');
       const video = document.getElementById('video');
-
-      // Bug 6 FIX: store interval ID so stopSession() can clear it cleanly
       videoInterval = setInterval(() => {
         if (!sessionActive || ws?.readyState !== WebSocket.OPEN) return;
         ctx.drawImage(video, 0, 0, 320, 240);
@@ -284,26 +463,80 @@
           blob.arrayBuffer().then(buf => {
             const prefix = new TextEncoder().encode('VID:');
             const combined = new Uint8Array(prefix.length + buf.byteLength);
-            combined.set(prefix, 0);
-            combined.set(new Uint8Array(buf), prefix.length);
+            combined.set(prefix, 0); combined.set(new Uint8Array(buf), prefix.length);
             if (ws?.readyState === WebSocket.OPEN) ws.send(combined.buffer);
           });
         }, 'image/jpeg', 0.7);
       }, 1000);
     }
 
-    function speakWhisper(text) {
-      if (!window.speechSynthesis) return;
-      const utt = new SpeechSynthesisUtterance(text);
-      utt.rate = 1.1;
-      utt.pitch = 0.9;
-      utt.volume = 0.8;
-      window.speechSynthesis.speak(utt);
+    // ── SSE Dashboard ──
+    function connectSSE() {
+      const evtSrc = new EventSource(`${HTTP_BASE}/stream`);
+      evtSrc.addEventListener('score_update', (e) => updateDashboard(JSON.parse(e.data)));
+      evtSrc.onerror = () => setTimeout(connectSSE, 3000);
     }
 
-    // Init camera on load
-    window.onload = startCamera;
-  </script>
-</body>
+    function updateDashboard(data) {
+      const mode = data.mode || 'coach';
+      const badge = document.getElementById('modeBadge');
+      badge.textContent = mode === 'coach' ? 'COACH MODE' : 'ROOM READ MODE';
+      badge.className = `mode-badge ${mode}`;
 
+      document.getElementById('coachScores').style.display = mode === 'coach' ? 'flex' : 'none';
+      document.getElementById('roomScores').style.display = mode === 'roomread' ? 'flex' : 'none';
+
+      if (!isLive) {
+        isLive = true;
+        document.getElementById('statusDot').classList.add('live');
+        document.getElementById('statusText').textContent = 'Live';
+      }
+
+      const bar = (id, val, low = '#ef4444', mid = '#eab308', high = '#22c55e') => {
+        const el = document.getElementById(id + 'Bar');
+        const valEl = document.getElementById(id + 'Val');
+        if (!el || val == null) return;
+        el.style.width = val + '%';
+        valEl.textContent = val + '%';
+        valEl.style.color = val < 40 ? low : val < 70 ? mid : high;
+      };
+
+      if (mode === 'coach') {
+        bar('pace', data.pace); bar('clarity', data.clarity); bar('energy', data.energy);
+        document.getElementById('fillerCount').textContent = data.filler_count ?? 0;
+        if (data.action) document.getElementById('actionText').textContent = data.action;
+        if (data.insight) addInsight(data.insight);
+      } else {
+        bar('eng', data.engagement);
+        bar('conf', data.confusion, '#22c55e', '#eab308', '#ef4444');
+        bar('exc', data.excitement);
+        if (data.alert) { document.getElementById('actionText').textContent = data.alert; addInsight(data.alert); }
+      }
+    }
+
+    let lastInsightText = '';
+    let lastInsightTime = 0;
+
+    function addInsight(text) {
+      const now = Date.now();
+      // Skip if same as last, or added less than 2s ago
+      if (text === lastInsightText || now - lastInsightTime < 2000) return;
+      lastInsightText = text;
+      lastInsightTime = now;
+
+      const list = document.getElementById('insightList');
+      list.querySelector('.waiting')?.remove();
+      const item = document.createElement('div');
+      item.className = 'insight-item';
+      item.textContent = text;
+      list.prepend(item);
+      const items = list.querySelectorAll('.insight-item');
+      if (items.length > 12) items[items.length - 1].remove();
+    }
+
+    // Init
+    window.onload = () => { startCamera(); connectSSE(); };
+  </script>
+
+</body>
 </html>

@@ -241,22 +241,27 @@ async def websocket_endpoint(websocket: WebSocket):
     except WebSocketDisconnect:
         logger.info("Mobile client disconnected")
     except Exception as e:
-        logger.error(f"WebSocket error: {e}")
-        # Fallback: simulate scores for demo if Gemini connection failed
-        logger.info("Activating simulation fallback for demo")
-        try:
-            while True:
-                sim = simulate_scores(current_mode)
-                latest_scores.update(sim)
-                try:
-                    action = sim.get("action") or sim.get("alert", "")
-                    if action:
-                        await websocket.send_text(json.dumps({"type": "whisper", "text": action}))
-                except Exception:
-                    break
-                await asyncio.sleep(3)
-        except Exception:
-            pass
+        logger.error(f"WebSocket error: {type(e).__name__}: {e}")
+        # Only simulate if we NEVER got real scores (Gemini failed to connect)
+        if not got_real_scores:
+            logger.info(f"Activating simulation fallback for demoRunner (AI Studio) model={MODEL_ID if 'MODEL_ID' in dir() else 'unknown'}...")
+            try:
+                while True:
+                    sim = simulate_scores(current_mode)
+                    latest_scores.update(sim)
+                    try:
+                        action = sim.get("action") or sim.get("alert", "")
+                        if action:
+                            await websocket.send_text(json.dumps({"type": "whisper", "text": action}))
+                    except Exception:
+                        break
+                    await asyncio.sleep(3)
+            except Exception:
+                pass
+        else:
+            logger.info("Session ended after real scores — no simulation needed")
+            # Re-raise the exception if we got real scores, to indicate a problem
+            raise
     finally:
         active_session = False
         logger.info("Session ended — ready for new connection")
