@@ -326,6 +326,9 @@ class StageSenseAgent:
             finally:
                 live_request_queue.close()
 
+        # Buffer for streaming text fragments from the model
+        text_buffer = _TextAccumulator(mode)
+
         async def downstream():
             logger.info("✅ Gemini Live session open (AI Studio, ADK Runner)")
             async for event in runner.run_live(
@@ -334,13 +337,12 @@ class StageSenseAgent:
                 live_request_queue=live_request_queue,
                 run_config=run_config,
             ):
-                # Path 1: output_audio_transcription (primary for native-audio)
+                # Path 1: output_audio_transcription
                 output_tx = getattr(event, "output_audio_transcription", None)
                 if output_tx and getattr(output_tx, "final_transcript", None):
                     tx = output_tx.final_transcript
                     logger.info(f"Transcript: {tx[:80]!r}")
-                    scores = _parse_scores(tx, mode)
-                    if scores:
+                    for scores in text_buffer.feed(tx):
                         await score_queue.put(scores)
 
                 # Path 2: server_content model_turn parts
@@ -348,19 +350,15 @@ class StageSenseAgent:
                 if sc and getattr(sc, "model_turn", None):
                     for part in sc.model_turn.parts:
                         if getattr(part, "text", None):
-                            logger.info(f"Server text: {part.text[:80]!r}")
-                            scores = _parse_scores(part.text, mode)
-                            if scores:
+                            for scores in text_buffer.feed(part.text):
                                 await score_queue.put(scores)
 
-                # Path 3: content parts
+                # Path 3: content parts (streaming tokens arrive here)
                 content = getattr(event, "content", None)
                 if content and getattr(content, "parts", None):
                     for part in content.parts:
                         if getattr(part, "text", None):
-                            logger.info(f"Content text: {part.text[:80]!r}")
-                            scores = _parse_scores(part.text, mode)
-                            if scores:
+                            for scores in text_buffer.feed(part.text):
                                 await score_queue.put(scores)
 
         upstream_task = asyncio.create_task(upstream())
@@ -394,8 +392,50 @@ class StageSenseAgent:
 
 
 
+class _TextAccumulator:
+    """
+    Buffers streaming text fragments and yields complete JSON score dicts.
+
+    The native-audio model streams JSON as tiny token fragments across many events:
+        Event 1: '{'
+        Event 2: '"pace"'
+        Event 3: ': 75,'
+        ...
+        Event N: '}'
+
+    This class accumulates fragments, detects complete JSON objects by matching
+    braces, and yields parsed score dicts.
+    """
+
+    def __init__(self, mode: str):
+        self.mode = mode
+        self.buffer = ""
+        self.brace_depth = 0
+
+    def feed(self, text: str) -> list[dict]:
+        """Feed a text fragment. Returns list of complete score dicts (0 or more)."""
+        results = []
+        for ch in text:
+            if ch == "{":
+                if self.brace_depth == 0:
+                    self.buffer = ""  # Start fresh for new object
+                self.brace_depth += 1
+            if self.brace_depth > 0:
+                self.buffer += ch
+            if ch == "}":
+                self.brace_depth -= 1
+                if self.brace_depth == 0 and self.buffer:
+                    # Try to parse the complete object
+                    scores = _parse_scores(self.buffer, self.mode)
+                    if scores:
+                        logger.info(f"Parsed scores: {scores}")
+                        results.append(scores)
+                    self.buffer = ""
+        return results
+
+
 def _parse_scores(text: str, mode: str) -> dict | None:
-    """Robust JSON extraction — first-brace to last-brace."""
+    """Parse a complete JSON string into a score dict."""
     stripped = text.strip()
     try:
         start = stripped.find("{")
@@ -406,14 +446,4 @@ def _parse_scores(text: str, mode: str) -> dict | None:
             return scores
     except json.JSONDecodeError:
         pass
-    for line in stripped.splitlines():
-        line = line.strip()
-        if not line.startswith("{"):
-            continue
-        try:
-            scores = json.loads(line)
-            scores["mode"] = mode
-            return scores
-        except json.JSONDecodeError:
-            continue
     return None

@@ -217,15 +217,12 @@ async def websocket_endpoint(websocket: WebSocket):
 
     try:
         got_real_scores = False
-        score_timeout = 5  # seconds before fallback kicks in
-        last_score_time = asyncio.get_event_loop().time()
 
         async for scores in agent_instance.run_session(websocket, lambda: current_mode):
             # Update global scores for SSE broadcast
             latest_scores.update(scores)
             latest_scores["mode"] = current_mode
             got_real_scores = True
-            last_score_time = asyncio.get_event_loop().time()
 
             # Send coaching whisper back to mobile
             action = scores.get("action") or scores.get("alert", "")
@@ -244,7 +241,7 @@ async def websocket_endpoint(websocket: WebSocket):
         logger.error(f"WebSocket error: {type(e).__name__}: {e}")
         # Only simulate if we NEVER got real scores (Gemini failed to connect)
         if not got_real_scores:
-            logger.info(f"Activating simulation fallback for demoRunner (AI Studio) model={MODEL_ID if 'MODEL_ID' in dir() else 'unknown'}...")
+            logger.info("Activating simulation fallback")
             try:
                 while True:
                     sim = simulate_scores(current_mode)
@@ -260,8 +257,6 @@ async def websocket_endpoint(websocket: WebSocket):
                 pass
         else:
             logger.info("Session ended after real scores — no simulation needed")
-            # Re-raise the exception if we got real scores, to indicate a problem
-            raise
     finally:
         active_session = False
         logger.info("Session ended — ready for new connection")
