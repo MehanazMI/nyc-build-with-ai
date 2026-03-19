@@ -201,9 +201,9 @@ export function ParticipantList() {
                             }
                           `}
                         >
-                          {participant.icon_url ? (
+                          {(participant.portrait_url || participant.icon_url) ? (
                             <img
-                              src={participant.icon_url}
+                              src={participant.portrait_url || participant.icon_url || ''}
                               alt={participant.username}
                               className="w-full h-full object-cover"
                             />

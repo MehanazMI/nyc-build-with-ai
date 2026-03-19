@@ -57,9 +57,9 @@ export function ParticipantDetail() {
                 ${isCurrentUser ? 'border-space-orange shadow-glow-orange' : 'border-space-cream/30'}
               `}
             >
-              {selectedParticipant.icon_url ? (
+              {(selectedParticipant.portrait_url || selectedParticipant.icon_url) ? (
                 <img
-                  src={selectedParticipant.icon_url}
+                  src={selectedParticipant.portrait_url || selectedParticipant.icon_url || ''}
                   alt={selectedParticipant.username}
                   className="w-full h-full object-cover"
                 />
