@@ -1,0 +1,33 @@
+# .gcloudignore
+# Speeds up `gcloud builds submit` by excluding large/generated directories.
+# Cloud Build's Dockerfiles handle their own dependency installation.
+
+# This file itself is a gcloudignore
+.gcloudignore
+
+# Git
+.git
+.gitignore
+
+# Node modules (rebuilt inside Docker)
+**/node_modules/
+**/.next/
+
+# Python virtual environments and caches
+**/__pycache__/
+**/*.pyc
+**/*.pyo
+**/.venv/
+**/venv/
+**/.env
+
+# Test outputs and local artifacts
+**/outputs/
+**/.pytest_cache/
+
+# IDE / OS files
+.vscode/
+**/.DS_Store
+
+# Local dev files
+**/config.json
